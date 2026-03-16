@@ -6,6 +6,7 @@
   --gray: #6c757d;
   --text: #1a1a1a;
   --shadow: 0 2px 12px rgba(0,0,0,0.09);
+  --admin-toolbar-offset: 0px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -100,8 +101,12 @@ nav {
 .tab-btn:hover:not(.active) { background: #f5f5f5; }
 
 /* ── Layout ──────────────────────────────────────────── */
-main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
-.is-admin main { padding-bottom: 7.5rem; }
+main {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  padding-bottom: calc(1.5rem + var(--admin-toolbar-offset));
+}
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 .sync-badge {
@@ -175,7 +180,7 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
 .backup-status--toast {
   position: fixed;
   left: 50%;
-  bottom: 1rem;
+  bottom: calc(1rem + var(--admin-toolbar-offset));
   transform: translateX(-50%);
   z-index: 190;
   width: min(calc(100% - 2rem), 560px);
@@ -186,9 +191,6 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
   padding: 0.8rem 1rem;
   text-align: center;
   backdrop-filter: blur(10px);
-}
-.is-admin .backup-status--toast {
-  bottom: 6.9rem;
 }
 .backup-status[data-kind="success"] { color: #166534; }
 .backup-status[data-kind="error"] { color: #b42318; }
@@ -629,18 +631,17 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
   .tab-btn { flex: 1; padding: 0.85rem 0.25rem; font-size: 0.8rem; text-align: center; }
 
   /* Layout */
-  main { padding: 0.75rem; }
-  .is-admin main { padding-bottom: 9.5rem; }
+  main {
+    padding: 0.75rem;
+    padding-bottom: calc(0.75rem + var(--admin-toolbar-offset));
+  }
   .courts-grid { grid-template-columns: 1fr; }
   .pools-grid { grid-template-columns: 1fr; }
   .backup-btn { flex: 1 1 calc(50% - 0.4rem); }
   .backup-status--toast {
     width: calc(100% - 1rem);
-    bottom: 0.6rem;
+    bottom: calc(0.6rem + var(--admin-toolbar-offset));
     padding: 0.75rem 0.85rem;
-  }
-  .is-admin .backup-status--toast {
-    bottom: 8.1rem;
   }
   .admin-toolbar {
     width: calc(100% - 1rem);

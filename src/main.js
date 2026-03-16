@@ -26,6 +26,8 @@ let statusTimer = null;
 let pollTimer = null;
 let adminBusy = false;
 let remoteBootError = null;
+let toolbarOffsetRaf = null;
+let adminToolbarObserver = null;
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => goTab(btn.dataset.tab));
@@ -33,6 +35,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 setupAdminControls();
 setupAdminTools();
+setupAdminToolbarLayout();
 window.addEventListener('go-ouest:sync-error', event => {
   const message = event.detail?.error?.message || 'Synchronisation impossible.';
   setStatus(message, 'error');
@@ -287,6 +290,22 @@ function setupAdminTools() {
   });
 }
 
+function setupAdminToolbarLayout() {
+  const toolbar = document.getElementById('admin-toolbar');
+  if (!toolbar) return;
+
+  window.addEventListener('resize', scheduleAdminToolbarOffsetSync);
+
+  if ('ResizeObserver' in window) {
+    adminToolbarObserver = new ResizeObserver(() => {
+      scheduleAdminToolbarOffsetSync();
+    });
+    adminToolbarObserver.observe(toolbar);
+  }
+
+  scheduleAdminToolbarOffsetSync();
+}
+
 async function refreshRemoteState(options = {}) {
   const { silent = false, forceRender = false } = options;
   if (!getAppMode().remote) return;
@@ -349,7 +368,39 @@ function syncUi() {
   trigger.textContent = mode.admin ? 'Admin connecte' : 'Connexion admin';
   trigger.disabled = adminBusy;
 
+  scheduleAdminToolbarOffsetSync();
   renderAdminModal();
+}
+
+function scheduleAdminToolbarOffsetSync() {
+  if (toolbarOffsetRaf) {
+    window.cancelAnimationFrame(toolbarOffsetRaf);
+  }
+
+  toolbarOffsetRaf = window.requestAnimationFrame(() => {
+    toolbarOffsetRaf = null;
+    syncAdminToolbarOffset();
+  });
+}
+
+function syncAdminToolbarOffset() {
+  const toolbar = document.getElementById('admin-toolbar');
+  const rootStyle = document.documentElement.style;
+
+  if (!toolbar || toolbar.hidden) {
+    rootStyle.setProperty('--admin-toolbar-offset', '0px');
+    return;
+  }
+
+  const computed = window.getComputedStyle(toolbar);
+  if (computed.display === 'none' || computed.visibility === 'hidden') {
+    rootStyle.setProperty('--admin-toolbar-offset', '0px');
+    return;
+  }
+
+  const bottom = Number.parseFloat(computed.bottom) || 0;
+  const offset = Math.ceil(toolbar.getBoundingClientRect().height + bottom + 24);
+  rootStyle.setProperty('--admin-toolbar-offset', `${offset}px`);
 }
 
 function ensureAdminActionAllowed() {
