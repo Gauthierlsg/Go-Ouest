@@ -1,7 +1,8 @@
 import { BlobNotFoundError, BlobPreconditionFailedError, get, put } from '@vercel/blob';
 
 const STATE_PATHNAME = process.env.TOURNAMENT_STATE_PATH || 'go-ouest-2026/tournament-state.json';
-const MAX_WRITE_RETRIES = 4;
+const MAX_WRITE_RETRIES = 6;
+const WRITE_RETRY_DELAYS_MS = [60, 120, 200, 320, 500, 800];
 
 export function isStorageConfigured() {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
@@ -75,10 +76,19 @@ export async function mutateTournamentState(mutator) {
     } catch (error) {
       if (error instanceof BlobPreconditionFailedError) {
         lastError = error;
+        await wait(WRITE_RETRY_DELAYS_MS[attempt] ?? 800);
         continue;
       }
       throw error;
     }
+  }
+
+  if (lastError instanceof BlobPreconditionFailedError) {
+    const conflictError = new Error(
+      'Une autre mise a jour du tournoi est en cours. Reessaie dans quelques secondes.'
+    );
+    conflictError.statusCode = 409;
+    throw conflictError;
   }
 
   throw lastError || new Error('Impossible d’enregistrer l’état du tournoi.');
@@ -169,4 +179,10 @@ function ensureStorageConfigured() {
   if (!isStorageConfigured()) {
     throw new Error('BLOB_READ_WRITE_TOKEN manquant pour la synchro du tournoi.');
   }
+}
+
+function wait(durationMs) {
+  return new Promise(resolve => {
+    setTimeout(resolve, durationMs);
+  });
 }

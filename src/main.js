@@ -25,9 +25,12 @@ let activeTab = 'poules';
 let statusTimer = null;
 let pollTimer = null;
 let adminBusy = false;
+let adminToolBusy = false;
 let remoteBootError = null;
 let toolbarOffsetRaf = null;
 let adminToolbarObserver = null;
+let tournamentWriteQueue = Promise.resolve();
+let confirmModalResolver = null;
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => goTab(btn.dataset.tab));
@@ -36,6 +39,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 setupAdminControls();
 setupAdminTools();
 setupAdminToolbarLayout();
+setupConfirmModal();
 window.addEventListener('go-ouest:sync-error', event => {
   const message = event.detail?.error?.message || 'Synchronisation impossible.';
   setStatus(message, 'error');
@@ -86,23 +90,7 @@ async function connectRemote(sessionState) {
       lastRemoteUpdate: tournament.updatedAt ?? null,
     });
 
-    registerMutationHandler(async action => {
-      try {
-        const result = await apiRequest(API_TOURNAMENT, {
-          method: 'POST',
-          body: action,
-        });
-        if (result?.updatedAt) {
-          setAppMode({ lastRemoteUpdate: result.updatedAt });
-        }
-        return result;
-      } catch (error) {
-        if (error.status === 401) {
-          setAppMode({ admin: false, readOnly: true });
-        }
-        throw error;
-      }
-    });
+    registerMutationHandler(action => runTournamentWrite(action));
 
     startPolling();
     return true;
@@ -229,6 +217,11 @@ function setupAdminControls() {
   });
 
   document.addEventListener('keydown', event => {
+    const confirmModal = document.getElementById('confirm-modal');
+    if (event.key === 'Escape' && confirmModal && !confirmModal.hidden) {
+      resolveConfirmModal(false);
+      return;
+    }
     if (event.key === 'Escape' && !modal.hidden) {
       closeAdminModal();
     }
@@ -239,55 +232,92 @@ function setupAdminTools() {
   const mockBtn = document.getElementById('backup-mock');
   const resetBtn = document.getElementById('backup-reset');
 
-  mockBtn.addEventListener('click', async () => {
-    if (!ensureAdminActionAllowed()) return;
+  [mockBtn, resetBtn].forEach(button => {
+    button.addEventListener('pointerdown', event => {
+      event.preventDefault();
+    });
+  });
 
-    const shouldGenerate = window.confirm(
-      'Generer des scores aleatoires pour tout le tournoi ? Cela remplacera les scores actuels.'
-    );
+  mockBtn.addEventListener('click', async () => {
+    if (!ensureAdminActionAllowed() || adminToolBusy) return;
+
+    const shouldGenerate = await openConfirmModal({
+      title: 'Generer des mock data ?',
+      copy: 'Tous les scores actuels seront remplaces par des resultats aleatoires pour tester le tournoi.',
+      submitLabel: 'Generer',
+      submitVariant: 'primary',
+    });
     if (!shouldGenerate) return;
 
-    const nextState = createMockTournamentState();
+    await runAdminTool(async () => {
+      const nextState = createMockTournamentState();
 
-    try {
       if (getAppMode().remote) {
-        await apiRequest(API_TOURNAMENT, {
-          method: 'POST',
-          body: { type: 'replaceState', state: nextState },
+        const result = await runTournamentWrite({
+          type: 'replaceState',
+          state: nextState,
         });
-        await refreshRemoteState({ silent: true, forceRender: true });
+        if (result?.state) {
+          replaceState(result.state, { persist: true, notify: true });
+        }
       } else {
         replaceState(nextState, { persist: true, notify: true });
       }
 
       setStatus('Mock data generee pour les tests.', 'success');
-    } catch (error) {
-      setStatus(error.message || 'Generation mock impossible.', 'error');
-    }
+    }, 'Generation mock impossible.');
   });
 
   resetBtn.addEventListener('click', async () => {
-    if (!ensureAdminActionAllowed()) return;
+    if (!ensureAdminActionAllowed() || adminToolBusy) return;
 
-    const shouldReset = window.confirm('Reinitialiser tous les scores du tournoi ?');
+    const shouldReset = await openConfirmModal({
+      title: 'Reinitialiser tous les scores ?',
+      copy: 'Tous les scores de poules et de phase finale seront effaces sur tous les appareils synchronises.',
+      submitLabel: 'Reinitialiser',
+      submitVariant: 'danger',
+    });
     if (!shouldReset) return;
 
-    try {
+    await runAdminTool(async () => {
       if (getAppMode().remote) {
-        await apiRequest(API_TOURNAMENT, {
-          method: 'POST',
-          body: { type: 'reset' },
-        });
-        await refreshRemoteState({ silent: true, forceRender: true });
+        const result = await runTournamentWrite({ type: 'reset' });
+        if (result?.state) {
+          replaceState(result.state, { persist: true, notify: true });
+        }
       } else {
         resetState();
       }
 
       setStatus('Scores reinitialises.', 'success');
-    } catch (error) {
-      setStatus(error.message || 'Reinitialisation impossible.', 'error');
-    }
+    }, 'Reinitialisation impossible.');
   });
+}
+
+function setupConfirmModal() {
+  const modal = document.getElementById('confirm-modal');
+  const closeTargets = modal.querySelectorAll('[data-confirm-close]');
+  const submit = document.getElementById('confirm-modal-submit');
+
+  closeTargets.forEach(target => {
+    target.addEventListener('click', () => resolveConfirmModal(false));
+  });
+
+  submit.addEventListener('click', () => resolveConfirmModal(true));
+}
+
+async function runAdminTool(work, fallbackMessage) {
+  adminToolBusy = true;
+  syncUi();
+
+  try {
+    await work();
+  } catch (error) {
+    setStatus(error.message || fallbackMessage, 'error');
+  } finally {
+    adminToolBusy = false;
+    syncUi();
+  }
 }
 
 function setupAdminToolbarLayout() {
@@ -359,6 +389,8 @@ function syncUi() {
   const adminToolbar = document.getElementById('admin-toolbar');
   const trigger = document.getElementById('admin-access-trigger');
   const syncBadge = document.getElementById('sync-badge');
+  const mockBtn = document.getElementById('backup-mock');
+  const resetBtn = document.getElementById('backup-reset');
 
   document.body.classList.toggle('is-admin', mode.admin);
   document.body.classList.toggle('is-public', !mode.admin);
@@ -366,7 +398,9 @@ function syncUi() {
   adminToolbar.hidden = !mode.admin;
   syncBadge.textContent = buildSyncBadge(mode);
   trigger.textContent = mode.admin ? 'Admin connecte' : 'Connexion admin';
-  trigger.disabled = adminBusy;
+  trigger.disabled = adminBusy || adminToolBusy;
+  mockBtn.disabled = adminToolBusy;
+  resetBtn.disabled = adminToolBusy;
 
   scheduleAdminToolbarOffsetSync();
   renderAdminModal();
@@ -474,7 +508,7 @@ function renderAdminModal() {
 function openAdminModal() {
   const modal = document.getElementById('admin-modal');
   modal.hidden = false;
-  document.body.classList.add('admin-modal-open');
+  syncBodyModalState();
   renderAdminModal();
 }
 
@@ -482,7 +516,7 @@ function closeAdminModal() {
   const modal = document.getElementById('admin-modal');
   const input = document.getElementById('admin-password');
   modal.hidden = true;
-  document.body.classList.remove('admin-modal-open');
+  syncBodyModalState();
   input.value = '';
   clearAdminError();
 }
@@ -507,6 +541,76 @@ function setStatus(message, kind = '') {
     status.textContent = '';
     status.dataset.kind = '';
   }, 3500);
+}
+
+function openConfirmModal(options) {
+  const modal = document.getElementById('confirm-modal');
+  const title = document.getElementById('confirm-modal-title');
+  const copy = document.getElementById('confirm-modal-copy');
+  const submit = document.getElementById('confirm-modal-submit');
+
+  if (confirmModalResolver) {
+    confirmModalResolver(false);
+    confirmModalResolver = null;
+  }
+
+  title.textContent = options.title;
+  copy.textContent = options.copy;
+  submit.textContent = options.submitLabel || 'Confirmer';
+  submit.classList.remove('backup-btn--primary', 'backup-btn--danger');
+  submit.classList.add(
+    options.submitVariant === 'danger' ? 'backup-btn--danger' : 'backup-btn--primary'
+  );
+
+  modal.hidden = false;
+  syncBodyModalState();
+
+  return new Promise(resolve => {
+    confirmModalResolver = resolve;
+    window.setTimeout(() => submit.focus(), 0);
+  });
+}
+
+function resolveConfirmModal(confirmed) {
+  const modal = document.getElementById('confirm-modal');
+  const resolver = confirmModalResolver;
+
+  modal.hidden = true;
+  syncBodyModalState();
+  confirmModalResolver = null;
+
+  if (resolver) resolver(confirmed);
+}
+
+function syncBodyModalState() {
+  const adminModal = document.getElementById('admin-modal');
+  const confirmModal = document.getElementById('confirm-modal');
+  const hasOpenModal = (adminModal && !adminModal.hidden) || (confirmModal && !confirmModal.hidden);
+  document.body.classList.toggle('admin-modal-open', Boolean(hasOpenModal));
+}
+
+function runTournamentWrite(action) {
+  const task = async () => {
+    try {
+      const result = await apiRequest(API_TOURNAMENT, {
+        method: 'POST',
+        body: action,
+      });
+      if (result?.updatedAt) {
+        setAppMode({ lastRemoteUpdate: result.updatedAt });
+      }
+      return result;
+    } catch (error) {
+      if (error.status === 401) {
+        setAppMode({ admin: false, readOnly: true });
+      }
+      throw error;
+    }
+  };
+
+  const queued = tournamentWriteQueue.then(task, task);
+  tournamentWriteQueue = queued.catch(() => {});
+  return queued;
 }
 
 function shouldDelayRemoteRefresh() {

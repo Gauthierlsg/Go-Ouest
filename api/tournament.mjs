@@ -46,7 +46,7 @@ export default async function handler(req, res) {
       updatedAt: result.updatedAt,
     });
   } catch (error) {
-    return res.status(400).json({
+    return res.status(error.statusCode || 400).json({
       ok: false,
       error: error.message || 'Erreur serveur tournoi.',
     });

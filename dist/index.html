@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GO OUEST 🎾</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎾</text></svg>" />
-  <script type="module" crossorigin src="/assets/index-C_M2_6iB.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BEwvnW2Z.css">
+  <script type="module" crossorigin src="/assets/index-CfpRoz8I.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-gGlkSdVu.css">
 </head>
 <body>
   <header>
@@ -60,6 +60,19 @@
       <div id="admin-logged-panel" class="admin-logged-panel" hidden>
         <div class="admin-logged-panel__text">Tu peux maintenant saisir les scores et utiliser les outils organisateurs sur cet appareil.</div>
         <button id="admin-logout" class="backup-btn" type="button">Se deconnecter</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirm-modal" class="admin-modal" hidden>
+    <button class="admin-modal__backdrop" type="button" data-confirm-close aria-label="Annuler"></button>
+    <div class="admin-modal__dialog confirm-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+      <div class="admin-modal__eyebrow">Action admin</div>
+      <h2 id="confirm-modal-title" class="admin-modal__title">Confirmer l'action</h2>
+      <p id="confirm-modal-copy" class="admin-modal__copy"></p>
+      <div class="confirm-modal__actions">
+        <button id="confirm-modal-cancel" class="backup-btn" type="button" data-confirm-close>Annuler</button>
+        <button id="confirm-modal-submit" class="backup-btn backup-btn--primary" type="button">Confirmer</button>
       </div>
     </div>
   </div>

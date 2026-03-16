@@ -63,6 +63,19 @@
     </div>
   </div>
 
+  <div id="confirm-modal" class="admin-modal" hidden>
+    <button class="admin-modal__backdrop" type="button" data-confirm-close aria-label="Annuler"></button>
+    <div class="admin-modal__dialog confirm-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+      <div class="admin-modal__eyebrow">Action admin</div>
+      <h2 id="confirm-modal-title" class="admin-modal__title">Confirmer l'action</h2>
+      <p id="confirm-modal-copy" class="admin-modal__copy"></p>
+      <div class="confirm-modal__actions">
+        <button id="confirm-modal-cancel" class="backup-btn" type="button" data-confirm-close>Annuler</button>
+        <button id="confirm-modal-submit" class="backup-btn backup-btn--primary" type="button">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>
