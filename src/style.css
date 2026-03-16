@@ -192,11 +192,44 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
 /* Match wrapper — carries the connector pseudo-elements */
 .b-match-wrap { position: relative; }
 .b-match { background: white; border: 1px solid #ede0d4; border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; min-width: 200px; }
+.b-match-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  background: #fff7f0;
+  border-bottom: 1px solid #f5ece4;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--g1);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
 .b-team { padding: 0.6rem 0.9rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f5ece4; font-size: 0.83rem; }
 .b-team:last-child { border-bottom: none; }
 .b-team.win { background: #fff5eb; font-weight: 700; color: var(--g1); }
 .b-team--tbd { color: #c0b0a0; font-size: 0.78rem; font-style: italic; justify-content: center; }
-.b-sc { font-weight: 700; color: var(--gray); }
+.b-team-main { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
+.b-team-meta { color: #9a8777; font-size: 0.72rem; }
+.b-side-label { color: #9a7152; }
+.b-error { color: #b42318; }
+.b-score { display: flex; align-items: center; }
+.b-score-input {
+  width: 44px;
+  height: 36px;
+  border: 1.5px solid #e0c5b1;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--g1);
+  background: white;
+}
+.b-score-input:disabled {
+  background: #f7f1eb;
+  color: #baa89a;
+}
 .b-label-3rd { text-align: center; font-size: 0.68rem; font-weight: 800; color: var(--g1); text-transform: uppercase; letter-spacing: 0.7px; margin-top: 0.5rem; border-bottom: 2px solid var(--g1); padding-bottom: 0.3rem; }
 
 /* Bracket connector lines */

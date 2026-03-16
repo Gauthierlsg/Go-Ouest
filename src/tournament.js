@@ -4,6 +4,23 @@ import { getScore } from './state.js';
 export const duo = id => DUOS.find(d => d.id === id);
 export const label = id => { const d = duo(id); return `${d.p1} & ${d.p2}`; };
 
+const KNOCKOUT_DEF = {
+  quarterfinals: [
+    { id: 'QF1', label: 'QF1', sides: [{ qualifier: 0 }, { qualifier: 7 }] },
+    { id: 'QF2', label: 'QF2', sides: [{ qualifier: 1 }, { qualifier: 6 }] },
+    { id: 'QF3', label: 'QF3', sides: [{ qualifier: 2 }, { qualifier: 5 }] },
+    { id: 'QF4', label: 'QF4', sides: [{ qualifier: 3 }, { qualifier: 4 }] },
+  ],
+  semifinals: [
+    { id: 'SF1', label: 'SF1', sides: [{ winnerOf: 'QF1' }, { winnerOf: 'QF2' }] },
+    { id: 'SF2', label: 'SF2', sides: [{ winnerOf: 'QF3' }, { winnerOf: 'QF4' }] },
+  ],
+  finals: [
+    { id: 'F', label: 'Finale', sides: [{ winnerOf: 'SF1' }, { winnerOf: 'SF2' }] },
+    { id: 'TP', label: '3e place', sides: [{ loserOf: 'SF1' }, { loserOf: 'SF2' }] },
+  ],
+};
+
 export function allPoolMatches() {
   const list = []; let mid = 1;
   POOLS.forEach(pool => {
@@ -94,7 +111,78 @@ export function computeQualifiers(matches) {
     .filter(pool => pool.teams.length >= 4)
     .map(pool => {
       const s = poolStandings(pool, matches);
-      return { team: s[1]?.id, pool: pool.name, color: pool.color, pts: s[1]?.pts ?? 0, isWild: true };
-    }).sort((a, b) => b.pts - a.pts)[0];
+      return {
+        team: s[1]?.id,
+        pool: pool.name,
+        color: pool.color,
+        pts: s[1]?.pts ?? 0,
+        gf: s[1]?.gf ?? 0,
+        ga: s[1]?.ga ?? 0,
+        isWild: true,
+      };
+    })
+    .sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf)[0];
   return [...winners, bestRunnerUp];
+}
+
+export function computeKnockout(matches) {
+  const qualifiers = computeQualifiers(matches);
+  const qualifierMap = new Map(qualifiers.filter(q => q?.team).map(q => [q.team, q]));
+  const resolved = {};
+
+  const rounds = {
+    quarterfinals: resolveRound(KNOCKOUT_DEF.quarterfinals, qualifiers, qualifierMap, resolved),
+    semifinals: resolveRound(KNOCKOUT_DEF.semifinals, qualifiers, qualifierMap, resolved),
+    finals: resolveRound(KNOCKOUT_DEF.finals, qualifiers, qualifierMap, resolved),
+  };
+
+  return {
+    qualifiers,
+    rounds,
+    champion: rounds.finals[0]?.winner ?? null,
+  };
+}
+
+function resolveRound(defs, qualifiers, qualifierMap, resolved) {
+  return defs.map(def => {
+    const sides = def.sides.map(side => resolveSide(side, qualifiers, resolved));
+    const score = getScore(def.id);
+    const result = decideResult(sides, score, qualifierMap);
+    const match = {
+      id: def.id,
+      label: def.label,
+      sides,
+      score,
+      ready: sides.every(side => side?.team),
+      ...result,
+    };
+    resolved[def.id] = match;
+    return match;
+  });
+}
+
+function resolveSide(side, qualifiers, resolved) {
+  if (side.qualifier != null) return qualifiers[side.qualifier] ?? null;
+  if (side.winnerOf) return resolved[side.winnerOf]?.winner ?? null;
+  if (side.loserOf) return resolved[side.loserOf]?.loser ?? null;
+  return null;
+}
+
+function decideResult(sides, score, qualifierMap) {
+  const [s1, s2] = sides;
+  if (!s1?.team || !s2?.team || score.s1 == null || score.s2 == null || score.s1 === score.s2) {
+    return {
+      winner: null,
+      loser: null,
+      isTie: score.s1 != null && score.s1 === score.s2,
+    };
+  }
+
+  const winnerTeam = score.s1 > score.s2 ? s1.team : s2.team;
+  const loserTeam = winnerTeam === s1.team ? s2.team : s1.team;
+  return {
+    winner: qualifierMap.get(winnerTeam) ?? { team: winnerTeam },
+    loser: qualifierMap.get(loserTeam) ?? { team: loserTeam },
+    isTie: false,
+  };
 }

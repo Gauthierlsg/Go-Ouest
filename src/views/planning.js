@@ -1,6 +1,6 @@
 import { SLOT_MIN, START_HOUR } from '../data.js';
 import { allPoolMatches, buildSchedule, label } from '../tournament.js';
-import { getScore, setScore, subscribe } from '../state.js';
+import { getScore, setScore } from '../state.js';
 
 function fmtTime(slotIdx) {
   const total = START_HOUR * 60 + slotIdx * SLOT_MIN;
@@ -62,10 +62,12 @@ export function renderPlanning(container) {
       </div>
     </div>`;
 
-  // Score input handler
+  if (container.dataset.scoreBound === 'true') return;
+
   container.addEventListener('input', e => {
     const inp = e.target;
     if (!inp.dataset.mid) return;
     setScore(Number(inp.dataset.mid), inp.dataset.side, inp.value);
   });
+  container.dataset.scoreBound = 'true';
 }
