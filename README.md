@@ -17,7 +17,7 @@ Application web de gestion de tournoi de tennis mixte en double.
 - Page publique en lecture seule pour les participants
 - Connexion admin simple par mot de passe pour les organisateurs
 - Saisie des scores synchronisée entre appareils via Vercel Blob
-- Export / import JSON des scores + réinitialisation rapide côté admin
+- Réinitialisation rapide + génération de mock data côté admin
 - Interface mobile-first (optimisée téléphone pour le jour J)
 
 ## Stack
@@ -49,7 +49,7 @@ Le fonctionnement une fois déployé :
 
 - tous les participants voient la même page en lecture seule,
 - les organisateurs cliquent sur `Connexion admin` en haut à droite,
-- après mot de passe, cet appareil peut saisir / importer / réinitialiser,
+- après mot de passe, cet appareil peut saisir / tester / réinitialiser,
 - les autres appareils reçoivent les mises à jour automatiquement.
 
 Pour tester les routes API en local, utilise `vercel dev` plutôt que `vite`.

@@ -1,15 +1,13 @@
 import {
-  exportState,
   getAppMode,
   getState,
-  importState,
-  normalizeImportedState,
   registerMutationHandler,
   replaceState,
   resetState,
   setAppMode,
   subscribe,
 } from './state.js';
+import { createMockTournamentState } from './mock-data.js';
 import { renderPools } from './views/pools.js';
 import { renderPlanning } from './views/planning.js';
 import { renderFinale } from './views/finale.js';
@@ -231,44 +229,18 @@ function setupAdminControls() {
 }
 
 function setupAdminTools() {
-  const exportBtn = document.getElementById('backup-export');
-  const importBtn = document.getElementById('backup-import-trigger');
-  const importInput = document.getElementById('backup-import-input');
+  const mockBtn = document.getElementById('backup-mock');
   const resetBtn = document.getElementById('backup-reset');
 
-  exportBtn.addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(exportState(), null, 2)], {
-      type: 'application/json',
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `go-ouest-2026-backup-${timestampForFilename()}.json`;
-    document.body.append(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
-    setStatus('Backup JSON exporte.', 'success');
-  });
-
-  importBtn.addEventListener('click', () => {
-    importInput.click();
-  });
-
-  importInput.addEventListener('change', async event => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-    if (!file) return;
-
-    const shouldImport = window.confirm(
-      'Importer ce backup remplacera les scores actuels. Continuer ?'
+  mockBtn.addEventListener('click', async () => {
+    const shouldGenerate = window.confirm(
+      'Generer des scores aleatoires pour tout le tournoi ? Cela remplacera les scores actuels.'
     );
-    if (!shouldImport) return;
+    if (!shouldGenerate) return;
+
+    const nextState = createMockTournamentState();
 
     try {
-      const text = await file.text();
-      const nextState = normalizeImportedState(text);
-
       if (getAppMode().remote) {
         await apiRequest(API_TOURNAMENT, {
           method: 'POST',
@@ -276,19 +248,17 @@ function setupAdminTools() {
         });
         await refreshRemoteState({ silent: true, forceRender: true });
       } else {
-        importState(text);
+        replaceState(nextState, { persist: true, notify: true });
       }
 
-      setStatus('Backup importe avec succes.', 'success');
+      setStatus('Mock data generee pour les tests.', 'success');
     } catch (error) {
-      setStatus(error.message || 'Import impossible.', 'error');
+      setStatus(error.message || 'Generation mock impossible.', 'error');
     }
   });
 
   resetBtn.addEventListener('click', async () => {
-    const shouldReset = window.confirm(
-      'Reinitialiser tous les scores ? Pense a exporter un backup avant de confirmer.'
-    );
+    const shouldReset = window.confirm('Reinitialiser tous les scores du tournoi ?');
     if (!shouldReset) return;
 
     try {
@@ -359,7 +329,7 @@ function handleVisibilityRefresh() {
 
 function syncUi() {
   const mode = getAppMode();
-  const adminActions = document.getElementById('admin-actions');
+  const adminToolbar = document.getElementById('admin-toolbar');
   const title = document.getElementById('control-title');
   const meta = document.getElementById('backup-meta');
   const trigger = document.getElementById('admin-access-trigger');
@@ -368,7 +338,7 @@ function syncUi() {
   document.body.classList.toggle('is-admin', mode.admin);
   document.body.classList.toggle('is-public', !mode.admin);
 
-  adminActions.hidden = !mode.admin;
+  adminToolbar.hidden = !mode.admin;
 
   if (mode.source === 'local-dev') {
     title.textContent = 'Mode local de developpement';
@@ -437,7 +407,6 @@ function renderAdminModal() {
   const input = document.getElementById('admin-password');
   const submit = document.getElementById('admin-login-submit');
   const logoutBtn = document.getElementById('admin-logout');
-  const adminAccessAvailable = isAdminAccessAvailable(mode);
   const canSubmitLogin = canSubmitAdminLogin(mode);
 
   submit.disabled = adminBusy || !canSubmitLogin;
@@ -447,12 +416,12 @@ function renderAdminModal() {
     title.textContent = mode.source === 'local-dev' ? 'Mode local de developpement' : 'Mode admin actif';
     copy.textContent = mode.source === 'local-dev'
       ? 'Cette version locale reste editable sur cet appareil meme sans API admin.'
-      : 'Cet appareil peut saisir, importer et reinitialiser les scores.';
+      : 'Cet appareil peut saisir les scores, generer des donnees de test et reinitialiser le tournoi.';
     form.hidden = true;
     loggedPanel.hidden = false;
     loggedText.textContent = mode.source === 'local-dev'
       ? 'Tu peux tester la saisie localement ici, mais rien n’est partage avec les autres appareils.'
-      : 'Tu peux maintenant saisir les scores et utiliser les outils organisateurs sur cet appareil.';
+      : 'Tu peux maintenant saisir les scores et utiliser la barre d’actions admin en bas de page.';
     logoutBtn.textContent = mode.source === 'local-dev' ? 'Fermer' : 'Se deconnecter';
   } else {
     title.textContent = 'Connexion admin';
@@ -516,20 +485,6 @@ function countCompletedMatches() {
   return Object.values(getState().scores).filter(score => score?.s1 != null && score?.s2 != null).length;
 }
 
-function timestampForFilename() {
-  const now = new Date();
-  const pad = value => String(value).padStart(2, '0');
-  return [
-    now.getFullYear(),
-    pad(now.getMonth() + 1),
-    pad(now.getDate()),
-    '-',
-    pad(now.getHours()),
-    pad(now.getMinutes()),
-    pad(now.getSeconds()),
-  ].join('');
-}
-
 function formatDateTime(value) {
   return new Date(value).toLocaleTimeString('fr-FR', {
     hour: '2-digit',
@@ -544,12 +499,6 @@ function shouldDelayRemoteRefresh() {
 
 function isLocalDev() {
   return ['localhost', '127.0.0.1'].includes(window.location.hostname);
-}
-
-function isAdminAccessAvailable(mode) {
-  if (mode.admin) return true;
-  if (mode.source === 'local-dev') return true;
-  return mode.authConfigured;
 }
 
 function canSubmitAdminLogin(mode) {

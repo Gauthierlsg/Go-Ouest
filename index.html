@@ -28,12 +28,6 @@
         <div class="backup-title" id="control-title">Consultation publique</div>
         <div class="backup-meta" id="backup-meta"></div>
       </div>
-      <div class="backup-actions" id="admin-actions" hidden>
-        <button id="backup-export" class="backup-btn backup-btn--primary" type="button">Exporter JSON</button>
-        <button id="backup-import-trigger" class="backup-btn" type="button">Importer JSON</button>
-        <button id="backup-reset" class="backup-btn backup-btn--danger" type="button">Reinitialiser</button>
-        <input id="backup-import-input" class="backup-file-input" type="file" accept="application/json,.json" />
-      </div>
       <div class="backup-status-row">
         <div id="backup-status" class="backup-status" aria-live="polite"></div>
       </div>
@@ -43,6 +37,17 @@
     <section id="planning" class="tab-content"></section>
     <section id="finale" class="tab-content"></section>
   </main>
+
+  <aside id="admin-toolbar" class="admin-toolbar" hidden>
+    <div class="admin-toolbar__copy">
+      <div class="admin-toolbar__title">Actions admin</div>
+      <div class="admin-toolbar__meta">Tests et remise a zero pour les organisateurs</div>
+    </div>
+    <div class="admin-toolbar__actions">
+      <button id="backup-mock" class="backup-btn" type="button">Generer mock data</button>
+      <button id="backup-reset" class="backup-btn backup-btn--danger" type="button">Reinitialiser</button>
+    </div>
+  </aside>
 
   <div id="admin-modal" class="admin-modal" hidden>
     <button class="admin-modal__backdrop" type="button" data-admin-close aria-label="Fermer"></button>
