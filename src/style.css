@@ -402,6 +402,10 @@ main {
 }
 .stand-table th:last-child,
 .stand-table td:last-child { text-align: center; }
+.stand-table th:nth-child(6),
+.stand-table td:nth-child(6) {
+  text-align: center;
+}
 .stand-table td { padding: 0.55rem 0.8rem; border-top: 1px solid #f0f0f0; vertical-align: middle; }
 .stand-table tr.q td { background: #fff5eb; }
 .stand-table tr:hover td { background: #fff9f5; }
@@ -771,7 +775,7 @@ main {
     justify-content: stretch;
   }
 
-  /* Poules — cacher J/V/D, garder # · Duo · Pts */
+  /* Poules — cacher J/V/D, garder # · Duo · GA · Pts */
   .stand-table th:nth-child(3), .stand-table td:nth-child(3),
   .stand-table th:nth-child(4), .stand-table td:nth-child(4),
   .stand-table th:nth-child(5), .stand-table td:nth-child(5) { display: none; }

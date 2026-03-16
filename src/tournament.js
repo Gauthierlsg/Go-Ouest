@@ -96,7 +96,10 @@ export function teamStats(tid, poolName, matches) {
 
 export function poolStandings(pool, matches) {
   return pool.teams
-    .map(id => ({ id, ...teamStats(id, pool.name, matches) }))
+    .map(id => {
+      const stats = teamStats(id, pool.name, matches);
+      return { id, ...stats, gd: stats.gf - stats.ga };
+    })
     .sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
 }
 
@@ -117,10 +120,11 @@ export function computeQualifiers(matches) {
         pts: s[1]?.pts ?? 0,
         gf: s[1]?.gf ?? 0,
         ga: s[1]?.ga ?? 0,
+        gd: s[1]?.gd ?? 0,
         isWild: true,
       };
     })
-    .sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf)[0];
+    .sort((a, b) => b.gd - a.gd)[0];
   return [...winners, bestRunnerUp];
 }
 
