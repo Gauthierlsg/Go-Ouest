@@ -68,6 +68,7 @@ export function renderFinale(container) {
   const [q0, q1, q2, q3, q4, q5, q6, q7] = qualifiers;
   const invalidDrawCount = countInvalidDrawScores();
   const invalidDrawLabel = invalidDrawCount > 1 ? 'scores invalides' : 'score invalide';
+  const mobileSummary = renderMobileSummary(rounds);
 
   const qualCards = qualifiers.map((q, i) => `
     <div class="qual-card" style="border-color:${q?.color||'#aaa'}">
@@ -88,6 +89,7 @@ export function renderFinale(container) {
         ⚠️ <div><strong>${invalidDrawCount} ${invalidDrawLabel}.</strong> En cas d'égalité, saisis le point decisif pour valider le match.</div>
       </div>
     ` : ''}
+    ${mobileSummary}
 
     <div class="section-card">
       <div class="section-title" style="margin-bottom:1rem">Phase finale · 8 qualifiés</div>
@@ -174,6 +176,57 @@ export function renderFinale(container) {
     inp.blur();
   });
   container.dataset.scoreBound = 'true';
+}
+
+function renderMobileSummary(rounds) {
+  const sections = [
+    { title: 'Quarts de finale', matches: rounds.quarterfinals },
+    { title: 'Demi-finales', matches: rounds.semifinals },
+    { title: 'Matchs finaux', matches: [rounds.finals[1], rounds.finals[0]] },
+  ];
+
+  return `
+    <div class="section-card finale-mobile-summary">
+      <div class="section-title" style="margin-bottom:0.9rem">Scores de la phase finale</div>
+      <div class="finale-mobile-summary__sections">
+        ${sections.map(section => `
+          <div class="finale-mobile-summary__section">
+            <div class="finale-mobile-summary__section-title">${section.title}</div>
+            <div class="finale-mobile-summary__list">
+              ${section.matches.map(renderMobileSummaryMatch).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+}
+
+function renderMobileSummaryMatch(match) {
+  const invalidDraw = isDrawScore(match.score);
+  return `
+    <div class="finale-mobile-summary__match ${invalidDraw ? 'finale-mobile-summary__match--invalid' : ''}">
+      <div class="finale-mobile-summary__match-head">
+        <span>${match.label}</span>
+        <span>${matchLabel(match)}</span>
+      </div>
+      ${renderMobileSummarySide(match.sides[0], match.score?.s1)}
+      ${renderMobileSummarySide(match.sides[1], match.score?.s2)}
+      ${invalidDraw ? '<div class="finale-mobile-summary__error">Pas de match nul : ajouter le point decisif.</div>' : ''}
+    </div>`;
+}
+
+function renderMobileSummarySide(side, score) {
+  return `
+    <div class="finale-mobile-summary__row">
+      <div class="finale-mobile-summary__team">${side?.team ? label(side.team) : 'À déterminer'}</div>
+      <div class="finale-mobile-summary__score">${score ?? '—'}</div>
+    </div>`;
+}
+
+function matchLabel(match) {
+  if (match.id === 'TP') return '3e place';
+  if (match.id === 'F') return 'Finale';
+  return match.id;
 }
 
 function ensureBracketLayout(container) {
