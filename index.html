@@ -23,20 +23,12 @@
   </nav>
 
   <main>
-    <section class="backup-card">
-      <div>
-        <div class="backup-title" id="control-title">Consultation publique</div>
-        <div class="backup-meta" id="backup-meta"></div>
-      </div>
-      <div class="backup-status-row">
-        <div id="backup-status" class="backup-status" aria-live="polite"></div>
-      </div>
-    </section>
-
     <section id="poules" class="tab-content active"></section>
     <section id="planning" class="tab-content"></section>
     <section id="finale" class="tab-content"></section>
   </main>
+
+  <div id="backup-status" class="backup-status backup-status--toast" aria-live="polite"></div>
 
   <aside id="admin-toolbar" class="admin-toolbar" hidden>
     <div class="admin-toolbar__copy">

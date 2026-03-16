@@ -104,30 +104,6 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
 .is-admin main { padding-bottom: 7.5rem; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
-
-.backup-card {
-  background: white;
-  border-radius: 14px;
-  box-shadow: var(--shadow);
-  padding: 1rem 1.1rem;
-  margin-bottom: 1.25rem;
-  display: grid;
-  gap: 0.65rem;
-}
-.backup-title {
-  font-size: 0.95rem;
-  font-weight: 800;
-}
-.backup-meta {
-  color: var(--gray);
-  font-size: 0.82rem;
-  margin-top: 0.2rem;
-}
-.backup-status-row {
-  display: flex;
-  align-items: center;
-  min-height: 1.5rem;
-}
 .sync-badge {
   display: inline-flex;
   align-items: center;
@@ -190,11 +166,29 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
   color: #b42318;
   border-color: #f2c4bd;
 }
-.backup-file-input { display: none; }
 .backup-status {
   min-height: 1.2rem;
   font-size: 0.82rem;
   color: var(--gray);
+}
+.backup-status:empty { display: none; }
+.backup-status--toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  z-index: 190;
+  width: min(calc(100% - 2rem), 560px);
+  background: rgba(255, 250, 246, 0.98);
+  border: 1px solid #f1d9c7;
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(95, 54, 26, 0.16);
+  padding: 0.8rem 1rem;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+.is-admin .backup-status--toast {
+  bottom: 6.9rem;
 }
 .backup-status[data-kind="success"] { color: #166534; }
 .backup-status[data-kind="error"] { color: #b42318; }
@@ -607,7 +601,14 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
   .courts-grid { grid-template-columns: 1fr; }
   .pools-grid { grid-template-columns: 1fr; }
   .backup-btn { flex: 1 1 calc(50% - 0.4rem); }
-  .backup-status-row { flex-direction: column; align-items: flex-start; }
+  .backup-status--toast {
+    width: calc(100% - 1rem);
+    bottom: 0.6rem;
+    padding: 0.75rem 0.85rem;
+  }
+  .is-admin .backup-status--toast {
+    bottom: 8.1rem;
+  }
   .admin-toolbar {
     width: calc(100% - 1rem);
     bottom: 0.5rem;

@@ -1,6 +1,5 @@
 import {
   getAppMode,
-  getState,
   registerMutationHandler,
   replaceState,
   resetState,
@@ -335,8 +334,6 @@ function handleVisibilityRefresh() {
 function syncUi() {
   const mode = getAppMode();
   const adminToolbar = document.getElementById('admin-toolbar');
-  const title = document.getElementById('control-title');
-  const meta = document.getElementById('backup-meta');
   const trigger = document.getElementById('admin-access-trigger');
   const syncBadge = document.getElementById('sync-badge');
 
@@ -344,59 +341,11 @@ function syncUi() {
   document.body.classList.toggle('is-public', !mode.admin);
 
   adminToolbar.hidden = !mode.admin;
-
-  if (mode.source === 'local-dev') {
-    title.textContent = 'Mode local de developpement';
-  } else if (mode.source === 'local-admin') {
-    title.textContent = 'Console organisateurs locale';
-  } else if (mode.admin) {
-    title.textContent = 'Console organisateurs';
-  } else {
-    title.textContent = 'Consultation publique';
-  }
-
-  meta.textContent = buildMetaLine(mode);
   syncBadge.textContent = buildSyncBadge(mode);
   trigger.textContent = mode.admin ? 'Admin connecte' : 'Connexion admin';
   trigger.disabled = adminBusy;
 
   renderAdminModal();
-}
-
-function buildMetaLine(mode) {
-  const pieces = [];
-  const completedMatches = countCompletedMatches();
-
-  if (mode.remote) {
-    pieces.push(mode.admin ? 'Synchro cloud active' : 'Scores visibles en direct pour tous');
-  } else if (mode.source === 'local-dev') {
-    pieces.push('Aucune synchro cloud sur ce poste local');
-  } else if (mode.source === 'local-admin') {
-    pieces.push('Mode admin local actif uniquement sur cet appareil');
-  } else if (mode.source === 'remote-down') {
-    pieces.push('Service de synchro temporairement indisponible');
-  } else {
-    pieces.push('Lecture seule tant que le service admin est indisponible');
-  }
-
-  if (mode.lastRemoteUpdate) {
-    pieces.push(`Maj ${formatDateTime(mode.lastRemoteUpdate)}`);
-  }
-
-  pieces.push(
-    completedMatches > 0
-      ? `${completedMatches} match${completedMatches > 1 ? 's' : ''} saisi${completedMatches > 1 ? 's' : ''}`
-      : 'Aucun score saisi pour l’instant'
-  );
-
-  if (!mode.admin && mode.remote) {
-    pieces.push('Seuls les organisateurs connectes peuvent modifier les scores');
-  }
-  if (!mode.authConfigured && mode.remote) {
-    pieces.push('Connexion admin non configuree sur ce deploiement');
-  }
-
-  return pieces.join(' · ');
 }
 
 function buildSyncBadge(mode) {
@@ -497,18 +446,6 @@ function setStatus(message, kind = '') {
     status.textContent = '';
     status.dataset.kind = '';
   }, 3500);
-}
-
-function countCompletedMatches() {
-  return Object.values(getState().scores).filter(score => score?.s1 != null && score?.s2 != null).length;
-}
-
-function formatDateTime(value) {
-  return new Date(value).toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
 }
 
 function shouldDelayRemoteRefresh() {
