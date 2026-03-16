@@ -36,7 +36,7 @@ header::before {
     transparent 2px, transparent 18px
   );
 }
-.header-logo { height: 90px; object-fit: contain; position: relative; }
+.header-logo { height: 90px; object-fit: contain; position: relative; mix-blend-mode: multiply; }
 header .sub { font-size: 1rem; opacity: 0.8; margin-top: 0.4rem; position: relative; }
 
 .stats-row { display: flex; justify-content: center; gap: 2.5rem; margin-top: 1.5rem; position: relative; }
