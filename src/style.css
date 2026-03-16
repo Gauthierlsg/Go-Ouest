@@ -37,11 +37,11 @@ header::before {
   z-index: 0;
 }
 .header-logo {
-  height: 132px;
+  height: 118px;
   object-fit: contain;
   position: relative;
   z-index: 1;
-  filter: invert(1) saturate(0) brightness(3) drop-shadow(0 6px 16px rgba(0,0,0,0.18));
+  filter: invert(1) saturate(0) brightness(3);
   mix-blend-mode: normal;
 }
 header .sub { font-size: 1rem; opacity: 0.8; margin-top: 0.4rem; position: relative; }
@@ -333,7 +333,7 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
 @media (max-width: 740px) {
   /* Header */
   header { padding: 1.1rem 1rem 1rem; }
-  .header-logo { height: 92px; }
+  .header-logo { height: 84px; }
   header .sub { font-size: 0.82rem; margin-top: 0.25rem; }
   .stats-row { gap: 1.2rem; margin-top: 1rem; }
   .stat-num { font-size: 1.5rem; }
