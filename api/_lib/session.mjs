@@ -2,8 +2,8 @@ import crypto from 'node:crypto';
 
 const COOKIE_NAME = 'go_ouest_admin';
 const SESSION_TTL_SECONDS = 60 * 60 * 18;
-const DEFAULT_ADMIN_PASSWORD = 'BAGAS';
-const DEFAULT_SESSION_SECRET = 'go-ouest-2026-bagas-session-secret';
+const DEFAULT_ADMIN_PASSWORD = 'mdp';
+const DEFAULT_SESSION_SECRET = 'go-ouest-2026-mdp-session-secret';
 
 export function isAdminRequest(req) {
   const token = parseCookies(req)[COOKIE_NAME];

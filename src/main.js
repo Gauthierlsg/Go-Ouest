@@ -174,16 +174,19 @@ function setupAdminControls() {
         method: 'POST',
         body: { password: passwordInput.value },
       });
-      passwordInput.value = '';
       if (getAppMode().remote) {
         setAppMode({ admin: true, readOnly: false });
         await refreshRemoteState({ silent: true, forceRender: true });
-        setStatus('Mode admin active sur cet appareil.', 'success');
       } else {
         setAppMode({ admin: true, readOnly: false, source: 'local-admin' });
-        setStatus('Mode admin local actif sur cet appareil.', 'warning');
       }
-      renderAdminModal();
+      closeAdminModal();
+      setStatus(
+        getAppMode().remote
+          ? 'Mode admin active sur cet appareil.'
+          : 'Mode admin local actif sur cet appareil.',
+        getAppMode().remote ? 'success' : 'warning'
+      );
     } catch (error) {
       setAdminError(error.message || 'Connexion admin impossible.');
     } finally {
