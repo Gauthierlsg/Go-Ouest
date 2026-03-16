@@ -1,6 +1,6 @@
 import { SLOT_MIN, START_HOUR } from '../data.js';
 import { allPoolMatches, buildSchedule, label } from '../tournament.js';
-import { getScore, isReadOnlyMode, setScore } from '../state.js';
+import { commitScore, getScore, isReadOnlyMode, setDraftScore } from '../state.js';
 
 function sanitizeScore(value) {
   return value.replace(/\D+/g, '').slice(0, 2);
@@ -75,16 +75,7 @@ export function renderPlanning(container) {
     if (!inp.dataset.mid) return;
     const value = sanitizeScore(inp.value);
     if (inp.value !== value) inp.value = value;
-    setScore(Number(inp.dataset.mid), inp.dataset.side, value, { notify: false });
-  });
-
-  container.addEventListener('change', e => {
-    if (isReadOnlyMode()) return;
-    const inp = e.target;
-    if (!inp.dataset.mid) return;
-    const value = sanitizeScore(inp.value);
-    if (inp.value !== value) inp.value = value;
-    setScore(Number(inp.dataset.mid), inp.dataset.side, value);
+    setDraftScore(inp.dataset.mid, inp.dataset.side, value);
   });
 
   container.addEventListener('focusout', e => {
@@ -93,7 +84,14 @@ export function renderPlanning(container) {
     if (!inp.dataset.mid) return;
     const value = sanitizeScore(inp.value);
     if (inp.value !== value) inp.value = value;
-    setScore(Number(inp.dataset.mid), inp.dataset.side, value);
+    void commitScore(inp.dataset.mid, inp.dataset.side, value);
+  });
+
+  container.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const inp = e.target;
+    if (!inp.dataset.mid) return;
+    inp.blur();
   });
   container.dataset.scoreBound = 'true';
 }

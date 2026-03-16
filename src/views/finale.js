@@ -1,5 +1,5 @@
 import { allPoolMatches, computeKnockout, label } from '../tournament.js';
-import { getScore, isReadOnlyMode, setScore } from '../state.js';
+import { commitScore, getScore, isReadOnlyMode, setDraftScore } from '../state.js';
 
 const BRACKET_CONNECTIONS = [
   ['QF1', 'SF1'],
@@ -138,16 +138,7 @@ export function renderFinale(container) {
     if (!inp.dataset.mid) return;
     const value = sanitizeScore(inp.value);
     if (inp.value !== value) inp.value = value;
-    setScore(inp.dataset.mid, inp.dataset.side, value, { notify: false });
-  });
-
-  container.addEventListener('change', e => {
-    if (isReadOnlyMode()) return;
-    const inp = e.target;
-    if (!inp.dataset.mid) return;
-    const value = sanitizeScore(inp.value);
-    if (inp.value !== value) inp.value = value;
-    setScore(inp.dataset.mid, inp.dataset.side, value);
+    setDraftScore(inp.dataset.mid, inp.dataset.side, value);
   });
 
   container.addEventListener('focusout', e => {
@@ -156,7 +147,14 @@ export function renderFinale(container) {
     if (!inp.dataset.mid) return;
     const value = sanitizeScore(inp.value);
     if (inp.value !== value) inp.value = value;
-    setScore(inp.dataset.mid, inp.dataset.side, value);
+    void commitScore(inp.dataset.mid, inp.dataset.side, value);
+  });
+
+  container.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const inp = e.target;
+    if (!inp.dataset.mid) return;
+    inp.blur();
   });
   container.dataset.scoreBound = 'true';
 }

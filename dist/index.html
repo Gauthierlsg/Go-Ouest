@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GO OUEST 🎾</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎾</text></svg>" />
-  <script type="module" crossorigin src="/assets/index-8RjbUtRq.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-CiykTL22.css">
+  <script type="module" crossorigin src="/assets/index-DZBiFboT.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-D3GtlUzz.css">
 </head>
 <body>
-
   <header>
+    <button id="admin-access-trigger" class="admin-access-btn" type="button">Connexion admin</button>
     <img src="/logo.png" alt="GO OUEST 2026" class="header-logo" />
   </header>
 
@@ -23,23 +23,47 @@
   <main>
     <section class="backup-card">
       <div>
-        <div class="backup-title">Sauvegarde & partage</div>
+        <div class="backup-title" id="control-title">Consultation publique</div>
         <div class="backup-meta" id="backup-meta"></div>
       </div>
-      <div class="backup-actions">
+      <div class="backup-actions" id="admin-actions" hidden>
         <button id="backup-export" class="backup-btn backup-btn--primary" type="button">Exporter JSON</button>
-        <button id="backup-share" class="backup-btn" type="button">Partager lien</button>
         <button id="backup-import-trigger" class="backup-btn" type="button">Importer JSON</button>
         <button id="backup-reset" class="backup-btn backup-btn--danger" type="button">Reinitialiser</button>
         <input id="backup-import-input" class="backup-file-input" type="file" accept="application/json,.json" />
       </div>
-      <div id="share-panel" class="share-panel" hidden></div>
-      <div id="backup-status" class="backup-status" aria-live="polite"></div>
+      <div class="backup-status-row">
+        <span class="sync-badge" id="sync-badge">Public</span>
+        <div id="backup-status" class="backup-status" aria-live="polite"></div>
+      </div>
     </section>
+
     <section id="poules" class="tab-content active"></section>
     <section id="planning" class="tab-content"></section>
     <section id="finale" class="tab-content"></section>
   </main>
+
+  <div id="admin-modal" class="admin-modal" hidden>
+    <button class="admin-modal__backdrop" type="button" data-admin-close aria-label="Fermer"></button>
+    <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+      <button class="admin-modal__close" type="button" data-admin-close aria-label="Fermer">×</button>
+      <div class="admin-modal__eyebrow">Organisateurs</div>
+      <h2 id="admin-modal-title" class="admin-modal__title">Connexion admin</h2>
+      <p id="admin-modal-copy" class="admin-modal__copy"></p>
+
+      <form id="admin-login-form" class="admin-form">
+        <label class="admin-form__label" for="admin-password">Mot de passe</label>
+        <input id="admin-password" class="admin-form__input" type="password" autocomplete="current-password" required />
+        <div id="admin-error" class="admin-form__error" aria-live="polite"></div>
+        <button id="admin-login-submit" class="backup-btn backup-btn--primary admin-form__submit" type="submit">Activer le mode admin</button>
+      </form>
+
+      <div id="admin-logged-panel" class="admin-logged-panel" hidden>
+        <div class="admin-logged-panel__text">Tu peux maintenant saisir les scores et utiliser les outils organisateurs sur cet appareil.</div>
+        <button id="admin-logout" class="backup-btn" type="button">Se deconnecter</button>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
