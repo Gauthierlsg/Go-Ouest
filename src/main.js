@@ -399,11 +399,17 @@ function syncUi() {
   document.body.classList.toggle('is-public', !mode.admin);
 
   adminToolbar.hidden = !mode.admin;
+  adminToolbar.setAttribute('aria-hidden', String(!mode.admin));
+  adminToolbar.inert = !mode.admin;
   syncBadge.textContent = buildSyncBadge(mode);
   trigger.textContent = mode.admin ? 'Admin connecte' : 'Connexion admin';
   trigger.disabled = adminBusy || adminToolBusy;
-  mockBtn.disabled = adminToolBusy;
-  resetBtn.disabled = adminToolBusy;
+  mockBtn.disabled = !mode.admin || adminToolBusy;
+  resetBtn.disabled = !mode.admin || adminToolBusy;
+
+  if (!mode.admin) {
+    resolveConfirmModal(false);
+  }
 
   scheduleAdminToolbarOffsetSync();
   renderAdminModal();
