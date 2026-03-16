@@ -1,0 +1,13 @@
+{
+  "name": "go-ouest",
+  "version": "0.1.0",
+  "description": "Tournoi de tennis mixte GO OUEST",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

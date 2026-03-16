@@ -1,0 +1,302 @@
+:root {
+  --g1: #c2450a;
+  --g2: #e8670e;
+  --bg: #fef6ee;
+  --white: #fff;
+  --gray: #6c757d;
+  --text: #1a1a1a;
+  --shadow: 0 2px 12px rgba(0,0,0,0.09);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── Header ─────────────────────────────────────────── */
+header {
+  background: linear-gradient(135deg, var(--g1) 0%, var(--g2) 60%, #f59e0b 100%);
+  color: white;
+  padding: 2rem 1.5rem 1.75rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 2px,
+    transparent 2px, transparent 18px
+  );
+}
+header h1 { font-size: 2.6rem; font-weight: 900; letter-spacing: -1px; position: relative; }
+header .sub { font-size: 1rem; opacity: 0.8; margin-top: 0.4rem; position: relative; }
+
+.stats-row { display: flex; justify-content: center; gap: 2.5rem; margin-top: 1.5rem; position: relative; }
+.stat-num { font-size: 2rem; font-weight: 800; line-height: 1; }
+.stat-lbl { font-size: 0.7rem; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 0.2rem; }
+
+/* ── Nav ─────────────────────────────────────────────── */
+nav {
+  background: white;
+  display: flex;
+  border-bottom: 2px solid #f0d9c8;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.tab-btn {
+  padding: 0.95rem 1.5rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--gray);
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.15s;
+}
+.tab-btn.active { color: var(--g1); border-bottom-color: var(--g1); font-weight: 700; }
+.tab-btn:hover:not(.active) { background: #f5f5f5; }
+
+/* ── Layout ──────────────────────────────────────────── */
+main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── Banners ─────────────────────────────────────────── */
+.banner {
+  background: #fff8e1;
+  border: 1px solid #f0c040;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.banner.info { background: #fef3e8; border-color: #f0a060; }
+.q-sample { background: #fff5eb; border: 1px solid #e8670e; padding: 0 4px; border-radius: 3px; font-size: 0.8rem; }
+
+/* ── Pool cards ──────────────────────────────────────── */
+.pools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; }
+.pool-card { background: white; border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+.pool-hdr {
+  padding: 0.9rem 1.1rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.pool-hdr h3 { font-size: 1.05rem; font-weight: 800; }
+.badge {
+  background: rgba(255,255,255,0.22);
+  padding: 0.15rem 0.55rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.stand-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+.stand-table th {
+  padding: 0.45rem 0.8rem;
+  background: #f7f7f7;
+  color: var(--gray);
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  text-align: left;
+}
+.stand-table th:last-child,
+.stand-table td:last-child { text-align: center; }
+.stand-table td { padding: 0.55rem 0.8rem; border-top: 1px solid #f0f0f0; vertical-align: middle; }
+.stand-table tr.q td { background: #fff5eb; }
+.stand-table tr:hover td { background: #fff9f5; }
+
+.rnk { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; }
+.r1 { background: #ffd700; color: #333; }
+.r2 { background: #c0c0c0; color: #333; }
+.r3 { background: #cd7f32; color: white; }
+.rn { background: #e9ecef; color: #555; }
+
+.duo-name { font-weight: 600; font-size: 0.85rem; }
+.pts-badge { background: var(--g1); color: white; border-radius: 6px; padding: 0.1rem 0.5rem; font-weight: 700; font-size: 0.8rem; }
+
+/* ── Planning ────────────────────────────────────────── */
+.planning-header { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.section-title { font-size: 1.1rem; font-weight: 800; }
+.planning-meta { color: var(--gray); font-size: 0.85rem; }
+
+.courts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.court-card { background: white; border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+.court-hdr { padding: 0.9rem 1.1rem; color: white; font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; }
+.c1-hdr { background: linear-gradient(90deg, #b83a07, #e05a1a); }
+.c2-hdr { background: linear-gradient(90deg, #1a3a7c, #2563eb); }
+
+.match-row {
+  display: flex;
+  align-items: center;
+  padding: 0.65rem 1rem;
+  border-top: 1px solid #f0f0f0;
+  gap: 0.75rem;
+  transition: background 0.12s;
+}
+.match-row:hover { background: #fff9f5; }
+.empty-slot { display: flex; align-items: center; padding: 0.65rem 1rem; border-top: 1px solid #f0f0f0; gap: 0.75rem; color: #ccc; font-size: 0.8rem; }
+
+.m-time { font-size: 0.78rem; font-weight: 700; color: #888; min-width: 42px; font-variant-numeric: tabular-nums; }
+.m-body { flex: 1; min-width: 0; }
+.m-teams { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vs { color: #aaa; font-weight: 400; }
+.m-pool-tag { display: inline-block; font-size: 0.68rem; padding: 0.1rem 0.45rem; border-radius: 8px; color: white; margin-top: 0.1rem; font-weight: 600; }
+
+.m-score { display: flex; align-items: center; gap: 0.35rem; }
+.sc-input {
+  width: 38px; height: 34px;
+  border: 1.5px solid #dee2e6; border-radius: 6px;
+  text-align: center; font-size: 1rem; font-weight: 700;
+  color: var(--g1); outline: none; transition: border-color 0.15s;
+  -moz-appearance: textfield;
+}
+.sc-input::-webkit-inner-spin-button,
+.sc-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.sc-input:focus { border-color: var(--g2); }
+.sc-sep { color: #aaa; font-weight: 700; }
+
+/* ── Finale ──────────────────────────────────────────── */
+.section-card { background: white; border-radius: 14px; box-shadow: var(--shadow); padding: 1.5rem; }
+
+.bracket-wrap { overflow-x: auto; padding-bottom: 1rem; }
+.bracket { display: flex; gap: 2.5rem; align-items: flex-start; min-width: 940px; padding: 0.25rem 0; }
+.b-round { display: flex; flex-direction: column; }
+.b-round-title {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--gray);
+  letter-spacing: 0.8px;
+  margin-bottom: 0.5rem;
+  background: #f0f0f0;
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+}
+.b-round-spacer { height: 1rem; }
+
+/* Match wrapper — carries the connector pseudo-elements */
+.b-match-wrap { position: relative; }
+.b-match { background: white; border: 1px solid #e8e8e8; border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; min-width: 195px; }
+.b-team { padding: 0.6rem 0.9rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; font-size: 0.83rem; }
+.b-team:last-child { border-bottom: none; }
+.b-team.win { background: #fff5eb; font-weight: 700; color: var(--g1); }
+.b-sc { font-weight: 700; color: var(--gray); }
+.b-label-3rd { text-align: center; font-size: 0.72rem; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.25rem; }
+
+/* Bracket connector lines */
+.b-pair { position: relative; display: flex; flex-direction: column; gap: 0.75rem; }
+.b-pair--sf { gap: 7rem; }
+
+/* Right horizontal stub (non-solo pairs only) */
+.b-pair:not(.b-pair--solo) .b-match-wrap::after {
+  content: ''; position: absolute;
+  top: 50%; right: -1.25rem;
+  width: 1.25rem; height: 2px;
+  background: #e0b898; pointer-events: none;
+}
+/* Vertical bar joining two stubs */
+.b-pair:not(.b-pair--solo)::after {
+  content: ''; position: absolute;
+  right: -1.25rem; width: 2px;
+  background: #e0b898; pointer-events: none;
+  top: 2.5rem;
+  height: 5.75rem; /* match-h(5rem) + gap(0.75rem) */
+}
+.b-pair--sf::after { height: 12rem; /* match-h(5rem) + gap(7rem) */ }
+
+/* Left incoming stub on all rounds except the first */
+.b-round:not(:first-child) .b-match-wrap::before {
+  content: ''; position: absolute;
+  top: 50%; left: -1.25rem;
+  width: 1.25rem; height: 2px;
+  background: #e0b898; pointer-events: none;
+}
+
+.trophy-box {
+  background: linear-gradient(135deg, #ffd700, #ffa000);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  color: #3d2200;
+  min-width: 180px;
+  box-shadow: 0 4px 20px rgba(255,180,0,0.35);
+}
+.trophy-icon { font-size: 2.5rem; }
+.trophy-name { font-weight: 800; font-size: 1rem; margin-top: 0.4rem; }
+.trophy-sub { font-size: 0.85rem; opacity: 0.7; margin-top: 0.2rem; }
+
+.qual-grid { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.qual-card {
+  border: 2px solid;
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  min-width: 155px;
+  background: white;
+}
+.qual-pool { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; }
+.qual-name { font-weight: 700; font-size: 0.88rem; margin-top: 0.2rem; }
+.qual-meta { font-size: 0.75rem; color: var(--gray); margin-top: 0.15rem; }
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 740px) {
+  /* Header */
+  header { padding: 1.1rem 1rem 1rem; }
+  header h1 { font-size: 1.7rem; }
+  header .sub { font-size: 0.82rem; margin-top: 0.25rem; }
+  .stats-row { gap: 1.2rem; margin-top: 1rem; }
+  .stat-num { font-size: 1.5rem; }
+  .stat-lbl { font-size: 0.65rem; }
+
+  /* Nav — tabs full width, plus grands pour le toucher */
+  .tab-btn { flex: 1; padding: 0.85rem 0.25rem; font-size: 0.8rem; text-align: center; }
+
+  /* Layout */
+  main { padding: 0.75rem; }
+  .courts-grid { grid-template-columns: 1fr; }
+  .pools-grid { grid-template-columns: 1fr; }
+
+  /* Poules — cacher J/V/D, garder # · Duo · Pts */
+  .stand-table th:nth-child(3), .stand-table td:nth-child(3),
+  .stand-table th:nth-child(4), .stand-table td:nth-child(4),
+  .stand-table th:nth-child(5), .stand-table td:nth-child(5) { display: none; }
+  .stand-table td { padding: 0.5rem 0.65rem; }
+  .stand-table th { padding: 0.4rem 0.65rem; }
+  .duo-name { font-size: 0.82rem; }
+
+  /* Planning — noms sur plusieurs lignes, gros inputs tactiles */
+  .match-row { padding: 0.6rem 0.75rem; gap: 0.5rem; }
+  .m-time { min-width: 34px; font-size: 0.72rem; }
+  .m-teams { white-space: normal; line-height: 1.35; font-size: 0.83rem; }
+  .sc-input { width: 44px; height: 40px; font-size: 1.1rem; border-radius: 8px; }
+  .m-score { gap: 0.3rem; }
+
+  /* Banners plus compacts */
+  .banner { font-size: 0.8rem; padding: 0.65rem 0.85rem; }
+
+  /* Finale qualifiés */
+  .qual-card { min-width: 130px; padding: 0.5rem 0.75rem; }
+
+  /* Bracket : scroll horizontal sur mobile, réduction de la largeur des matchs */
+  .b-match { min-width: 155px; }
+  .trophy-box { min-width: unset; }
+}
