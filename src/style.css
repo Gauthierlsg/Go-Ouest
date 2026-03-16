@@ -359,7 +359,7 @@ main {
 .banner.info { background: #fef3e8; border-color: #f0a060; }
 .q-sample { background: #fff5eb; border: 1px solid #e8670e; padding: 0 4px; border-radius: 3px; font-size: 0.8rem; }
 
-.tourney-meta { color: var(--gray); font-size: 0.8rem; margin-bottom: 0.75rem; }
+.tourney-meta { color: #576270; font-size: 0.8rem; margin-bottom: 0.75rem; }
 
 /* ── Pool cards ──────────────────────────────────────── */
 .pools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; }
@@ -373,18 +373,19 @@ main {
 }
 .pool-hdr h3 { font-size: 1.05rem; font-weight: 800; }
 .badge {
-  background: rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.92);
+  color: #5a3417;
   padding: 0.15rem 0.55rem;
   border-radius: 20px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .stand-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
 .stand-table th {
   padding: 0.45rem 0.8rem;
-  background: #f7f7f7;
-  color: var(--gray);
+  background: #f3f4f6;
+  color: #4b5563;
   font-weight: 700;
   font-size: 0.7rem;
   text-transform: uppercase;
