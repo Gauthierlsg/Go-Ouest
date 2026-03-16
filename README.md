@@ -15,7 +15,7 @@ Application web de gestion de tournoi de tennis mixte en double.
 - Classements en temps réel par poule
 - Bracket de phase finale avec arbre visuel QF → SF → Finale
 - Page publique en lecture seule pour les participants
-- Connexion admin simple par mot de passe pour les organisateurs
+- Connexion admin simple par mot de passe pour les organisateurs, par defaut `BAGAS`
 - Saisie des scores synchronisée entre appareils via Vercel Blob
 - Réinitialisation rapide + génération de mock data côté admin
 - Interface mobile-first (optimisée téléphone pour le jour J)
@@ -40,7 +40,7 @@ En local avec `vite`, l'app passe automatiquement en mode local de développemen
 
 Pour avoir la version publique + admin partagée sur Vercel, configure ces variables d'environnement :
 
-- `ADMIN_PASSWORD` : mot de passe simple partagé aux organisateurs
+- `ADMIN_PASSWORD` : mot de passe simple partagé aux organisateurs, par defaut `BAGAS`
 - `ADMIN_SESSION_SECRET` : secret long pour signer le cookie admin
 - `BLOB_READ_WRITE_TOKEN` : token du store Vercel Blob
 - `TOURNAMENT_STATE_PATH` : optionnel, chemin du JSON de tournoi dans Blob

@@ -185,9 +185,14 @@ function setupAdminControls() {
         body: { password: passwordInput.value },
       });
       passwordInput.value = '';
-      setAppMode({ admin: true, readOnly: false });
-      await refreshRemoteState({ silent: true, forceRender: true });
-      setStatus('Mode admin active sur cet appareil.', 'success');
+      if (getAppMode().remote) {
+        setAppMode({ admin: true, readOnly: false });
+        await refreshRemoteState({ silent: true, forceRender: true });
+        setStatus('Mode admin active sur cet appareil.', 'success');
+      } else {
+        setAppMode({ admin: true, readOnly: false, source: 'local-admin' });
+        setStatus('Mode admin local actif sur cet appareil.', 'warning');
+      }
       renderAdminModal();
     } catch (error) {
       setAdminError(error.message || 'Connexion admin impossible.');
@@ -342,6 +347,8 @@ function syncUi() {
 
   if (mode.source === 'local-dev') {
     title.textContent = 'Mode local de developpement';
+  } else if (mode.source === 'local-admin') {
+    title.textContent = 'Console organisateurs locale';
   } else if (mode.admin) {
     title.textContent = 'Console organisateurs';
   } else {
@@ -364,6 +371,8 @@ function buildMetaLine(mode) {
     pieces.push(mode.admin ? 'Synchro cloud active' : 'Scores visibles en direct pour tous');
   } else if (mode.source === 'local-dev') {
     pieces.push('Aucune synchro cloud sur ce poste local');
+  } else if (mode.source === 'local-admin') {
+    pieces.push('Mode admin local actif uniquement sur cet appareil');
   } else if (mode.source === 'remote-down') {
     pieces.push('Service de synchro temporairement indisponible');
   } else {
@@ -392,6 +401,7 @@ function buildMetaLine(mode) {
 
 function buildSyncBadge(mode) {
   if (mode.source === 'local-dev') return 'Mode local';
+  if (mode.source === 'local-admin') return 'Admin local';
   if (!mode.admin) return 'Lecture seule';
   return 'Mode admin';
 }
@@ -413,22 +423,30 @@ function renderAdminModal() {
   logoutBtn.disabled = adminBusy;
 
   if (mode.admin) {
-    title.textContent = mode.source === 'local-dev' ? 'Mode local de developpement' : 'Mode admin actif';
+    title.textContent = mode.source === 'local-dev'
+      ? 'Mode local de developpement'
+      : mode.source === 'local-admin'
+        ? 'Mode admin local'
+        : 'Mode admin actif';
     copy.textContent = mode.source === 'local-dev'
       ? 'Cette version locale reste editable sur cet appareil meme sans API admin.'
-      : 'Cet appareil peut saisir les scores, generer des donnees de test et reinitialiser le tournoi.';
+      : mode.source === 'local-admin'
+        ? 'Le mot de passe a ete accepte, mais la synchro distante est indisponible. Les changements resteront locaux a cet appareil.'
+        : 'Cet appareil peut saisir les scores, generer des donnees de test et reinitialiser le tournoi.';
     form.hidden = true;
     loggedPanel.hidden = false;
     loggedText.textContent = mode.source === 'local-dev'
       ? 'Tu peux tester la saisie localement ici, mais rien n’est partage avec les autres appareils.'
-      : 'Tu peux maintenant saisir les scores et utiliser la barre d’actions admin en bas de page.';
+      : mode.source === 'local-admin'
+        ? 'Tu peux saisir localement sur cet appareil en attendant le retour de la synchro.'
+        : 'Tu peux maintenant saisir les scores et utiliser la barre d’actions admin en bas de page.';
     logoutBtn.textContent = mode.source === 'local-dev' ? 'Fermer' : 'Se deconnecter';
   } else {
     title.textContent = 'Connexion admin';
     copy.textContent = !mode.authConfigured
       ? 'La connexion admin n’est pas encore configuree sur ce deploiement.'
       : !mode.remote
-        ? 'Le service de synchronisation est indisponible pour le moment. La connexion admin redevient possible des que ce service revient.'
+        ? 'La synchro distante est indisponible, mais tu peux quand meme ouvrir un mode admin local sur cet appareil.'
         : 'Entrez le mot de passe organisateurs pour debloquer la saisie sur cet appareil.';
     form.hidden = !canSubmitLogin;
     loggedPanel.hidden = true;
@@ -503,7 +521,7 @@ function isLocalDev() {
 
 function canSubmitAdminLogin(mode) {
   if (mode.source === 'local-dev') return true;
-  return mode.remote && mode.authConfigured;
+  return mode.authConfigured;
 }
 
 async function apiRequest(url, options = {}) {

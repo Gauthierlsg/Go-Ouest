@@ -2,6 +2,8 @@ import crypto from 'node:crypto';
 
 const COOKIE_NAME = 'go_ouest_admin';
 const SESSION_TTL_SECONDS = 60 * 60 * 18;
+const DEFAULT_ADMIN_PASSWORD = 'BAGAS';
+const DEFAULT_SESSION_SECRET = 'go-ouest-2026-bagas-session-secret';
 
 export function isAdminRequest(req) {
   const token = parseCookies(req)[COOKIE_NAME];
@@ -22,13 +24,12 @@ export function isAdminRequest(req) {
 }
 
 export function isAdminPasswordValid(password) {
-  const expected = process.env.ADMIN_PASSWORD;
-  if (!expected) return false;
+  const expected = getAdminPassword();
   return safeEqual(String(password ?? ''), expected);
 }
 
 export function isAuthConfigured() {
-  return Boolean(process.env.ADMIN_PASSWORD && process.env.ADMIN_SESSION_SECRET);
+  return Boolean(getAdminPassword() && getSessionSecret());
 }
 
 export function setAdminSessionCookie(res) {
@@ -64,8 +65,16 @@ function parseCookies(req) {
 }
 
 function sign(payload) {
-  const secret = process.env.ADMIN_SESSION_SECRET || '';
+  const secret = getSessionSecret();
   return crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+}
+
+function getAdminPassword() {
+  return process.env.ADMIN_PASSWORD || DEFAULT_ADMIN_PASSWORD;
+}
+
+function getSessionSecret() {
+  return process.env.ADMIN_SESSION_SECRET || DEFAULT_SESSION_SECRET;
 }
 
 function safeEqual(a, b) {
