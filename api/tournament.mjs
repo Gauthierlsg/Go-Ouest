@@ -103,6 +103,10 @@ function applyScore(state, matchId, side, value) {
     return;
   }
 
+  if (current.s1 != null && current.s2 != null && current.s1 === current.s2) {
+    throw new Error('Match nul interdit : saisis le point decisif pour departager le match.');
+  }
+
   state.scores[key] = current;
 }
 

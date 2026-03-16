@@ -1,8 +1,11 @@
 import { DUOS, POOLS } from '../data.js';
+import { countInvalidDrawScores } from '../state.js';
 import { label, allPoolMatches, poolStandings } from '../tournament.js';
 
 export function renderPools(container) {
   const matches = allPoolMatches();
+  const invalidDrawCount = countInvalidDrawScores();
+  const invalidDrawLabel = invalidDrawCount > 1 ? 'scores invalides' : 'score invalide';
 
   const rankClass = i => ['r1', 'r2', 'r3', 'rn'][Math.min(i, 3)];
 
@@ -33,6 +36,11 @@ export function renderPools(container) {
 
   container.innerHTML = `
     <div class="tourney-meta">${DUOS.length} duos · ${POOLS.length} poules · ${matches.length} matchs · 2 terrains · 6h</div>
+    ${invalidDrawCount ? `
+      <div class="banner error">
+        ⚠️ <div><strong>${invalidDrawCount} ${invalidDrawLabel}.</strong> Les matchs nuls ne comptent pas dans le classement. Saisis le point decisif pour valider ces rencontres.</div>
+      </div>
+    ` : ''}
     <div class="banner info">
       ℹ️ <div>
         <strong>Format :</strong> 7 poules → top 1 de chaque poule + meilleur 2ème = <strong>8 qualifiés</strong>.

@@ -1,5 +1,12 @@
 import { allPoolMatches, computeKnockout, label } from '../tournament.js';
-import { commitScore, getScore, isReadOnlyMode, setDraftScore } from '../state.js';
+import {
+  commitScore,
+  countInvalidDrawScores,
+  getScore,
+  isDrawScore,
+  isReadOnlyMode,
+  setDraftScore,
+} from '../state.js';
 
 const BRACKET_CONNECTIONS = [
   ['QF1', 'SF1'],
@@ -22,7 +29,7 @@ const teamTag = (team) => {
   return `<span class="m-pool-tag" style="background:${team.color ?? '#888'}">${team.pool ?? 'Phase finale'}${team.isWild ? ' ⭐' : ''}</span>`;
 };
 
-const bTeam = (team, matchId, side, isDisabled) => {
+const bTeam = (team, matchId, side, isDisabled, isInvalid) => {
   if (!team?.team) return `<div class="b-team b-team--tbd"><span>À déterminer</span></div>`;
   const sc = getScore(matchId);
   return `
@@ -32,30 +39,35 @@ const bTeam = (team, matchId, side, isDisabled) => {
         <span>${label(team.team)}</span>
       </div>
       <div class="b-score">
-        <input class="b-score-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
+        <input class="b-score-input ${isInvalid ? 'b-score-input--invalid' : ''}" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
           value="${sc[side] ?? ''}" placeholder="—"
           data-mid="${matchId}" data-side="${side}" ${isDisabled ? 'disabled' : ''}>
       </div>
     </div>`;
 };
 
-const bMatch = (match, sideLabel) => `
+const bMatch = (match, sideLabel) => {
+  const invalidDraw = isDrawScore(match.score);
+  return `
   <div class="b-match-wrap" data-match-id="${match.id}">
-    <div class="b-match">
+    <div class="b-match ${invalidDraw ? 'b-match--invalid' : ''}">
       <div class="b-match-head">
         <span>${match.label}</span>
-        ${match.isTie ? '<span class="b-error">Pas de match nul</span>' : `<span class="b-side-label">${sideLabel}</span>`}
+        ${match.isTie ? '<span class="b-error">Score incorrect</span>' : `<span class="b-side-label">${sideLabel}</span>`}
       </div>
-      ${bTeam(match.sides[0], match.id, 's1', !match.ready)}
-      ${bTeam(match.sides[1], match.id, 's2', !match.ready)}
+      ${bTeam(match.sides[0], match.id, 's1', !match.ready, invalidDraw)}
+      ${bTeam(match.sides[1], match.id, 's2', !match.ready, invalidDraw)}
     </div>
   </div>`;
+};
 
 export function renderFinale(container) {
   const readOnly = isReadOnlyMode();
   const matches = allPoolMatches();
   const { qualifiers, rounds, champion } = computeKnockout(matches);
   const [q0, q1, q2, q3, q4, q5, q6, q7] = qualifiers;
+  const invalidDrawCount = countInvalidDrawScores();
+  const invalidDrawLabel = invalidDrawCount > 1 ? 'scores invalides' : 'score invalide';
 
   const qualCards = qualifiers.map((q, i) => `
     <div class="qual-card" style="border-color:${q?.color||'#aaa'}">
@@ -69,8 +81,13 @@ export function renderFinale(container) {
   container.innerHTML = `
     <div class="banner info">
       ℹ️ Les quarts se remplissent selon les résultats des poules.
-      Saisissez ensuite les scores de phase finale ici pour faire avancer automatiquement le bracket.
+      Saisissez ensuite les scores de phase finale ici pour faire avancer automatiquement le bracket. Les matchs nuls sont interdits.
     </div>
+    ${invalidDrawCount ? `
+      <div class="banner error">
+        ⚠️ <div><strong>${invalidDrawCount} ${invalidDrawLabel}.</strong> En cas d'égalité, saisis le point decisif pour valider le match.</div>
+      </div>
+    ` : ''}
 
     <div class="section-card">
       <div class="section-title" style="margin-bottom:1rem">Phase finale · 8 qualifiés</div>

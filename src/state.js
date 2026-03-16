@@ -24,6 +24,14 @@ export function getScore(matchId) {
   return _state.scores[String(matchId)] || {};
 }
 
+export function isDrawScore(score) {
+  return score?.s1 != null && score?.s2 != null && Number(score.s1) === Number(score.s2);
+}
+
+export function countInvalidDrawScores() {
+  return Object.values(_state.scores).filter(score => isDrawScore(score)).length;
+}
+
 export function exportState() {
   return {
     format: BACKUP_FORMAT,
@@ -93,6 +101,11 @@ export async function commitScore(matchId, side, value) {
   applyScoreUpdate(_state, matchId, side, value);
   _persistLocal();
   _notify();
+
+  if (isDrawScore(getScore(matchId))) {
+    emitSyncError(new Error('Match nul interdit : saisis le point decisif pour departager le match.'));
+    return _state;
+  }
 
   if (!_mutationHandler) return _state;
 

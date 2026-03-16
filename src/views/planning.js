@@ -6,7 +6,14 @@ import {
   TRANSITION_MIN,
 } from '../data.js';
 import { allPoolMatches, buildSchedule, computeKnockout, label } from '../tournament.js';
-import { commitScore, getScore, isReadOnlyMode, setDraftScore } from '../state.js';
+import {
+  commitScore,
+  countInvalidDrawScores,
+  getScore,
+  isDrawScore,
+  isReadOnlyMode,
+  setDraftScore,
+} from '../state.js';
 
 const KNOCKOUT_CONFIG = [
   {
@@ -89,12 +96,19 @@ export function renderPlanning(container) {
   const poolSlots = buildSchedule(poolMatches);
   const planning = buildPlanningRows(poolMatches, poolSlots);
   const totalDuration = planning.endMinutes - START_HOUR * 60;
+  const invalidDrawCount = countInvalidDrawScores();
+  const invalidDrawLabel = invalidDrawCount > 1 ? 'scores invalides' : 'score invalide';
 
   container.innerHTML = `
     <div class="banner">
       ⚠️ <strong>${poolMatches.length} matchs de poule + 8 matchs de phase finale · pause ${KNOCKOUT_BREAK_MIN} min · fin estimée ${fmtClock(planning.endMinutes)} (~${minutesToHuman(totalDuration)}).</strong>
       Si ça dépasse : réduire les matchs à <strong>${MATCH_DURATION_MIN - 2}-${MATCH_DURATION_MIN - 1} min</strong> et garder la transition fluide.
     </div>
+    ${invalidDrawCount ? `
+      <div class="banner error">
+        ⚠️ <div><strong>${invalidDrawCount} ${invalidDrawLabel}.</strong> Les matchs nuls sont interdits : saisis le point decisif pour valider ces matchs.</div>
+      </div>
+    ` : ''}
     <div class="planning-header">
       <span class="section-title">Planning</span>
       <span class="planning-meta">Début ${String(START_HOUR).padStart(2, '0')}h00 · matchs ${MATCH_DURATION_MIN} min + ${TRANSITION_MIN} min transition · pause ${KNOCKOUT_BREAK_MIN} min avant les quarts</span>
@@ -266,23 +280,24 @@ function renderRow(row, readOnly) {
   }
 
   const sc = getScore(row.matchId);
+  const invalidDraw = isDrawScore(sc);
   const disabled = readOnly || !row.editable;
   return `
-    <div class="match-row ${row.kind === 'knockout' ? 'match-row--knockout' : ''}" data-mid="${row.matchId}">
+    <div class="match-row ${row.kind === 'knockout' ? 'match-row--knockout' : ''} ${invalidDraw ? 'match-row--invalid' : ''}" data-mid="${row.matchId}">
       <span class="m-time">${fmtClock(row.startMinutes)}</span>
       <div class="m-body">
         <div class="m-teams">${row.leftLabel} <span class="vs">vs</span> ${row.rightLabel}</div>
         <div class="m-subline">
           <span class="m-pool-tag" style="background:${row.tagColor}">${row.tag}</span>
-          <span class="m-stage-copy">${row.detail}</span>
+          <span class="m-stage-copy ${invalidDraw ? 'm-stage-copy--error' : ''}">${invalidDraw ? 'Score incorrect : pas de match nul, ajouter le point decisif' : row.detail}</span>
         </div>
       </div>
       <div class="m-score">
-        <input class="sc-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
+        <input class="sc-input ${invalidDraw ? 'sc-input--invalid' : ''}" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
           value="${sc.s1 ?? ''}" placeholder="—"
           data-mid="${row.matchId}" data-side="s1" ${disabled ? 'disabled' : ''}>
         <span class="sc-sep">:</span>
-        <input class="sc-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
+        <input class="sc-input ${invalidDraw ? 'sc-input--invalid' : ''}" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
           value="${sc.s2 ?? ''}" placeholder="—"
           data-mid="${row.matchId}" data-side="s2" ${disabled ? 'disabled' : ''}>
       </div>

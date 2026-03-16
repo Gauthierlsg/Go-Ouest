@@ -360,6 +360,11 @@ main {
   gap: 0.5rem;
 }
 .banner.info { background: #fef3e8; border-color: #f0a060; }
+.banner.error {
+  background: #fff1f0;
+  border-color: #f3b4aa;
+  color: #8f2d1f;
+}
 .q-sample { background: #fff5eb; border: 1px solid #e8670e; padding: 0 4px; border-radius: 3px; font-size: 0.8rem; }
 
 .tourney-meta { color: #576270; font-size: 0.8rem; margin-bottom: 0.75rem; }
@@ -507,6 +512,12 @@ main {
 .match-row--knockout {
   background: linear-gradient(90deg, rgba(255, 245, 235, 0.78), rgba(255, 255, 255, 0));
 }
+.match-row--invalid {
+  background: linear-gradient(90deg, rgba(255, 241, 240, 0.95), rgba(255, 255, 255, 0.72));
+}
+.match-row--invalid:hover {
+  background: linear-gradient(90deg, rgba(255, 236, 234, 1), rgba(255, 250, 249, 0.86));
+}
 .empty-slot { display: flex; align-items: center; padding: 0.65rem 1rem; border-top: 1px solid #f0f0f0; gap: 0.75rem; color: #ccc; font-size: 0.8rem; }
 .planning-break-row {
   display: flex;
@@ -544,6 +555,9 @@ main {
   color: #74563f;
   font-weight: 700;
 }
+.m-stage-copy--error {
+  color: #b42318;
+}
 
 .m-score { display: flex; align-items: center; gap: 0.35rem; }
 .sc-input {
@@ -556,6 +570,15 @@ main {
 .sc-input::-webkit-inner-spin-button,
 .sc-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .sc-input:focus { border-color: var(--g2); }
+.sc-input--invalid {
+  border-color: #d92d20;
+  color: #b42318;
+  background: #fff8f7;
+}
+.sc-input--invalid:focus {
+  border-color: #d92d20;
+  box-shadow: 0 0 0 4px rgba(217, 45, 32, 0.12);
+}
 .sc-sep { color: #aaa; font-weight: 700; }
 
 /* ── Finale ──────────────────────────────────────────── */
@@ -608,6 +631,9 @@ main {
   min-width: 200px;
   height: var(--b-match-height);
 }
+.b-match--invalid {
+  border-color: #f3b4aa;
+}
 .b-match-head {
   display: flex;
   justify-content: space-between;
@@ -659,6 +685,11 @@ main {
 .b-score-input:disabled {
   background: #f7f1eb;
   color: #baa89a;
+}
+.b-score-input--invalid {
+  border-color: #d92d20;
+  color: #b42318;
+  background: #fff8f7;
 }
 .b-label-3rd {
   position: absolute;

@@ -17,11 +17,6 @@ export function createMockTournamentState() {
 }
 
 function createPoolScore() {
-  if (Math.random() < 0.18) {
-    const tieScore = randomInt(4, 9);
-    return { s1: tieScore, s2: tieScore };
-  }
-
   return createDecidedScore(4, 9);
 }
 
