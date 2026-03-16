@@ -100,9 +100,10 @@ export function renderPlanning(container) {
   const invalidDrawLabel = invalidDrawCount > 1 ? 'scores invalides' : 'score invalide';
 
   container.innerHTML = `
-    <div class="banner">
-      ⚠️ <strong>${poolMatches.length} matchs de poule + 8 matchs de phase finale · pause ${KNOCKOUT_BREAK_MIN} min · fin estimée ${fmtClock(planning.endMinutes)} (~${minutesToHuman(totalDuration)}).</strong>
-      Si ça dépasse : réduire les matchs à <strong>${MATCH_DURATION_MIN - 2}-${MATCH_DURATION_MIN - 1} min</strong> et garder la transition fluide.
+    <div class="banner banner--planning">
+      <div class="banner-row">⚠️ <strong>Fin estimée ${fmtClock(planning.endMinutes)}</strong> · ${minutesToHuman(totalDuration)} au total</div>
+      <div class="banner-sub">${poolMatches.length} matchs de poule + 8 matchs de finale · pause ${KNOCKOUT_BREAK_MIN} min</div>
+      <div class="banner-sub">Si ça dépasse : passer les matchs à <strong>${MATCH_DURATION_MIN - 2}-${MATCH_DURATION_MIN - 1} min</strong></div>
     </div>
     ${invalidDrawCount ? `
       <div class="banner error">
