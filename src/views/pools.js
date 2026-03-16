@@ -1,20 +1,26 @@
 import { DUOS, POOLS } from '../data.js';
-import { label, allPoolMatches, poolStandings } from '../tournament.js';
+import { countInvalidDrawScores } from '../state.js';
+import { computeQualifiers, label, allPoolMatches, poolStandings } from '../tournament.js';
 
 export function renderPools(container) {
   const matches = allPoolMatches();
+  const invalidDrawCount = countInvalidDrawScores();
+  const invalidDrawLabel = invalidDrawCount > 1 ? 'scores invalides' : 'score invalide';
+  const qualifiers = computeQualifiers(matches);
+  const wildcardTeamId = qualifiers.find(q => q?.isWild)?.team;
 
   const rankClass = i => ['r1', 'r2', 'r3', 'rn'][Math.min(i, 3)];
 
   const poolCard = pool => {
     const standings = poolStandings(pool, matches);
     const rows = standings.map((s, i) => `
-      <tr class="${i === 0 ? 'q' : ''}">
+      <tr class="${i === 0 || s.id === wildcardTeamId ? 'q' : ''}">
         <td><span class="rnk ${rankClass(i)}">${i + 1}</span></td>
-        <td><span class="duo-name">${label(s.id)}</span></td>
+        <td><span class="duo-name">${label(s.id)}${s.id === wildcardTeamId ? ' ⭐' : ''}</span></td>
         <td>${s.j}</td>
         <td>${s.v}</td>
         <td>${s.d}</td>
+        <td>${s.gd > 0 ? `+${s.gd}` : s.gd}</td>
         <td><span class="pts-badge">${s.pts}</span></td>
       </tr>`).join('');
 
@@ -25,7 +31,7 @@ export function renderPools(container) {
           <span class="badge">${pool.teams.length} duos</span>
         </div>
         <table class="stand-table">
-          <thead><tr><th>#</th><th>Duo</th><th>J</th><th>V</th><th>D</th><th>Pts</th></tr></thead>
+          <thead><tr><th>#</th><th>Duo</th><th>J</th><th>V</th><th>D</th><th>GA</th><th>Pts</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>`;
@@ -33,9 +39,14 @@ export function renderPools(container) {
 
   container.innerHTML = `
     <div class="tourney-meta">${DUOS.length} duos · ${POOLS.length} poules · ${matches.length} matchs · 2 terrains · 6h</div>
+    ${invalidDrawCount ? `
+      <div class="banner error">
+        ⚠️ <div><strong>${invalidDrawCount} ${invalidDrawLabel}.</strong> Les matchs nuls ne comptent pas dans le classement. Saisis le point decisif pour valider ces rencontres.</div>
+      </div>
+    ` : ''}
     <div class="banner info">
       ℹ️ <div>
-        <strong>Format :</strong> 7 poules → top 1 de chaque poule + meilleur 2ème = <strong>8 qualifiés</strong>.
+        <strong>Format :</strong> 7 poules → top 1 de chaque poule + meilleur 2ème entre <strong>Poule A</strong> et <strong>Poule B</strong> au <strong>goal avérage</strong> = <strong>8 qualifiés</strong>.
         Ligne <span class="q-sample">orange</span> = qualifié provisoire.
       </div>
     </div>

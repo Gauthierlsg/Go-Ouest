@@ -1,5 +1,5 @@
 import { DUOS, POOLS } from './data.js';
-import { getScore } from './state.js';
+import { getScore, isDrawScore } from './state.js';
 
 export const duo = id => DUOS.find(d => d.id === id);
 export const label = id => { const d = duo(id); return `${d.p1} & ${d.p2}`; };
@@ -84,12 +84,11 @@ export function teamStats(tid, poolName, matches) {
     .filter(m => m.pool === poolName && (m.t1 === tid || m.t2 === tid))
     .forEach(m => {
       const sc = getScore(m.id);
-      if (sc.s1 == null || sc.s2 == null) return;
+      if (sc.s1 == null || sc.s2 == null || isDrawScore(sc)) return;
       const mine = m.t1 === tid ? sc.s1 : sc.s2;
       const theirs = m.t1 === tid ? sc.s2 : sc.s1;
       j++; gf += mine; ga += theirs;
       if (mine > theirs) { v++; pts += 3; }
-      else if (mine === theirs) { n++; pts += 1; }
       else d++;
     });
   return { j, v, d, n, pts, gf, ga };
@@ -97,7 +96,10 @@ export function teamStats(tid, poolName, matches) {
 
 export function poolStandings(pool, matches) {
   return pool.teams
-    .map(id => ({ id, ...teamStats(id, pool.name, matches) }))
+    .map(id => {
+      const stats = teamStats(id, pool.name, matches);
+      return { id, ...stats, gd: stats.gf - stats.ga };
+    })
     .sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
 }
 
@@ -118,10 +120,11 @@ export function computeQualifiers(matches) {
         pts: s[1]?.pts ?? 0,
         gf: s[1]?.gf ?? 0,
         ga: s[1]?.ga ?? 0,
+        gd: s[1]?.gd ?? 0,
         isWild: true,
       };
     })
-    .sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf)[0];
+    .sort((a, b) => b.gd - a.gd)[0];
   return [...winners, bestRunnerUp];
 }
 
@@ -170,11 +173,11 @@ function resolveSide(side, qualifiers, resolved) {
 
 function decideResult(sides, score, qualifierMap) {
   const [s1, s2] = sides;
-  if (!s1?.team || !s2?.team || score.s1 == null || score.s2 == null || score.s1 === score.s2) {
+  if (!s1?.team || !s2?.team || score.s1 == null || score.s2 == null || isDrawScore(score)) {
     return {
       winner: null,
       loser: null,
-      isTie: score.s1 != null && score.s1 === score.s2,
+      isTie: isDrawScore(score),
     };
   }
 

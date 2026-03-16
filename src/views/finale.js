@@ -1,5 +1,12 @@
 import { allPoolMatches, computeKnockout, label } from '../tournament.js';
-import { getScore, setScore } from '../state.js';
+import {
+  commitScore,
+  countInvalidDrawScores,
+  getScore,
+  isDrawScore,
+  isReadOnlyMode,
+  setDraftScore,
+} from '../state.js';
 
 const BRACKET_CONNECTIONS = [
   ['QF1', 'SF1'],
@@ -22,7 +29,7 @@ const teamTag = (team) => {
   return `<span class="m-pool-tag" style="background:${team.color ?? '#888'}">${team.pool ?? 'Phase finale'}${team.isWild ? ' ⭐' : ''}</span>`;
 };
 
-const bTeam = (team, matchId, side, isDisabled) => {
+const bTeam = (team, matchId, side, isDisabled, isInvalid) => {
   if (!team?.team) return `<div class="b-team b-team--tbd"><span>À déterminer</span></div>`;
   const sc = getScore(matchId);
   return `
@@ -32,29 +39,35 @@ const bTeam = (team, matchId, side, isDisabled) => {
         <span>${label(team.team)}</span>
       </div>
       <div class="b-score">
-        <input class="b-score-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
+        <input class="b-score-input ${isInvalid ? 'b-score-input--invalid' : ''}" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
           value="${sc[side] ?? ''}" placeholder="—"
           data-mid="${matchId}" data-side="${side}" ${isDisabled ? 'disabled' : ''}>
       </div>
     </div>`;
 };
 
-const bMatch = (match, sideLabel) => `
+const bMatch = (match, sideLabel) => {
+  const invalidDraw = isDrawScore(match.score);
+  return `
   <div class="b-match-wrap" data-match-id="${match.id}">
-    <div class="b-match">
+    <div class="b-match ${invalidDraw ? 'b-match--invalid' : ''}">
       <div class="b-match-head">
         <span>${match.label}</span>
-        ${match.isTie ? '<span class="b-error">Pas de match nul</span>' : `<span class="b-side-label">${sideLabel}</span>`}
+        ${match.isTie ? '<span class="b-error">Score incorrect</span>' : `<span class="b-side-label">${sideLabel}</span>`}
       </div>
-      ${bTeam(match.sides[0], match.id, 's1', !match.ready)}
-      ${bTeam(match.sides[1], match.id, 's2', !match.ready)}
+      ${bTeam(match.sides[0], match.id, 's1', !match.ready, invalidDraw)}
+      ${bTeam(match.sides[1], match.id, 's2', !match.ready, invalidDraw)}
     </div>
   </div>`;
+};
 
 export function renderFinale(container) {
+  const readOnly = isReadOnlyMode();
   const matches = allPoolMatches();
   const { qualifiers, rounds, champion } = computeKnockout(matches);
   const [q0, q1, q2, q3, q4, q5, q6, q7] = qualifiers;
+  const invalidDrawCount = countInvalidDrawScores();
+  const invalidDrawLabel = invalidDrawCount > 1 ? 'scores invalides' : 'score invalide';
 
   const qualCards = qualifiers.map((q, i) => `
     <div class="qual-card" style="border-color:${q?.color||'#aaa'}">
@@ -68,8 +81,13 @@ export function renderFinale(container) {
   container.innerHTML = `
     <div class="banner info">
       ℹ️ Les quarts se remplissent selon les résultats des poules.
-      Saisissez ensuite les scores de phase finale ici pour faire avancer automatiquement le bracket.
+      Saisissez ensuite les scores de phase finale ici pour faire avancer automatiquement le bracket. Les matchs nuls sont interdits.
     </div>
+    ${invalidDrawCount ? `
+      <div class="banner error">
+        ⚠️ <div><strong>${invalidDrawCount} ${invalidDrawLabel}.</strong> En cas d'égalité, saisis le point decisif pour valider le match.</div>
+      </div>
+    ` : ''}
 
     <div class="section-card">
       <div class="section-title" style="margin-bottom:1rem">Phase finale · 8 qualifiés</div>
@@ -81,27 +99,27 @@ export function renderFinale(container) {
             <div class="b-round b-round--quarters">
               <div class="b-round-title">Quarts de finale</div>
               <div class="b-round-body">
-                ${bMatch(rounds.quarterfinals[0], `${q0?.pool ?? '—'} vs ${q7?.pool ?? '—'}`)}
-                ${bMatch(rounds.quarterfinals[1], `${q1?.pool ?? '—'} vs ${q6?.pool ?? '—'}`)}
-                ${bMatch(rounds.quarterfinals[2], `${q2?.pool ?? '—'} vs ${q5?.pool ?? '—'}`)}
-                ${bMatch(rounds.quarterfinals[3], `${q3?.pool ?? '—'} vs ${q4?.pool ?? '—'}`)}
+                ${bMatchWithMode(rounds.quarterfinals[0], `${q0?.pool ?? '—'} vs ${q7?.pool ?? '—'}`, readOnly)}
+                ${bMatchWithMode(rounds.quarterfinals[1], `${q1?.pool ?? '—'} vs ${q6?.pool ?? '—'}`, readOnly)}
+                ${bMatchWithMode(rounds.quarterfinals[2], `${q2?.pool ?? '—'} vs ${q5?.pool ?? '—'}`, readOnly)}
+                ${bMatchWithMode(rounds.quarterfinals[3], `${q3?.pool ?? '—'} vs ${q4?.pool ?? '—'}`, readOnly)}
               </div>
             </div>
 
             <div class="b-round b-round--semis">
               <div class="b-round-title">Demi-finales</div>
               <div class="b-round-body">
-                ${bMatch(rounds.semifinals[0], 'Vainqueurs QF1/QF2')}
-                ${bMatch(rounds.semifinals[1], 'Vainqueurs QF3/QF4')}
+                ${bMatchWithMode(rounds.semifinals[0], 'Vainqueurs QF1/QF2', readOnly)}
+                ${bMatchWithMode(rounds.semifinals[1], 'Vainqueurs QF3/QF4', readOnly)}
               </div>
             </div>
 
             <div class="b-round b-round--finals">
               <div class="b-round-title">Finale</div>
               <div class="b-round-body">
-                ${bMatch(rounds.finals[0], 'Vainqueurs SF')}
+                ${bMatchWithMode(rounds.finals[0], 'Vainqueurs SF', readOnly)}
                 <div class="b-label-3rd">3ème place</div>
-                ${bMatch(rounds.finals[1], 'Perdants SF')}
+                ${bMatchWithMode(rounds.finals[1], 'Perdants SF', readOnly)}
               </div>
             </div>
 
@@ -132,27 +150,28 @@ export function renderFinale(container) {
   if (container.dataset.scoreBound === 'true') return;
 
   container.addEventListener('input', e => {
+    if (isReadOnlyMode()) return;
     const inp = e.target;
     if (!inp.dataset.mid) return;
     const value = sanitizeScore(inp.value);
     if (inp.value !== value) inp.value = value;
-    setScore(inp.dataset.mid, inp.dataset.side, value, { notify: false });
-  });
-
-  container.addEventListener('change', e => {
-    const inp = e.target;
-    if (!inp.dataset.mid) return;
-    const value = sanitizeScore(inp.value);
-    if (inp.value !== value) inp.value = value;
-    setScore(inp.dataset.mid, inp.dataset.side, value);
+    setDraftScore(inp.dataset.mid, inp.dataset.side, value);
   });
 
   container.addEventListener('focusout', e => {
+    if (isReadOnlyMode()) return;
     const inp = e.target;
     if (!inp.dataset.mid) return;
     const value = sanitizeScore(inp.value);
     if (inp.value !== value) inp.value = value;
-    setScore(inp.dataset.mid, inp.dataset.side, value);
+    void commitScore(inp.dataset.mid, inp.dataset.side, value);
+  });
+
+  container.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const inp = e.target;
+    if (!inp.dataset.mid) return;
+    inp.blur();
   });
   container.dataset.scoreBound = 'true';
 }
@@ -298,4 +317,18 @@ function getAnchor(node, side, stageRect) {
     x: Math.round((side === 'left' ? rect.left : rect.right) - stageRect.left),
     y: Math.round(rect.top + rect.height / 2 - stageRect.top),
   };
+}
+
+function bMatchWithMode(match, sideLabel, readOnly) {
+  return `
+    <div class="b-match-wrap" data-match-id="${match.id}">
+      <div class="b-match">
+        <div class="b-match-head">
+          <span>${match.label}</span>
+          ${match.isTie ? '<span class="b-error">Pas de match nul</span>' : `<span class="b-side-label">${sideLabel}</span>`}
+        </div>
+        ${bTeam(match.sides[0], match.id, 's1', !match.ready || readOnly)}
+        ${bTeam(match.sides[1], match.id, 's2', !match.ready || readOnly)}
+      </div>
+    </div>`;
 }

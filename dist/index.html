@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GO OUEST 🎾</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎾</text></svg>" />
-  <script type="module" crossorigin src="/assets/index-5xiKtTH0.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-4F6_EMGI.css">
+  <script type="module" crossorigin src="/assets/index-BvMdkMnd.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-xHCHZQ5_.css">
 </head>
 <body>
-
   <header>
+    <div class="admin-corner">
+      <button id="admin-access-trigger" class="admin-access-btn" type="button">Connexion admin</button>
+      <span class="sync-badge sync-badge--header" id="sync-badge">Lecture seule</span>
+    </div>
     <img src="/logo.png" alt="GO OUEST 2026" class="header-logo" />
   </header>
 
@@ -25,6 +28,54 @@
     <section id="planning" class="tab-content"></section>
     <section id="finale" class="tab-content"></section>
   </main>
+
+  <div id="backup-status" class="backup-status backup-status--toast" aria-live="polite"></div>
+
+  <aside id="admin-toolbar" class="admin-toolbar" hidden>
+    <div class="admin-toolbar__copy">
+      <div class="admin-toolbar__title">Actions admin</div>
+      <div class="admin-toolbar__meta">Tests et remise a zero pour les organisateurs</div>
+    </div>
+    <div class="admin-toolbar__actions">
+      <button id="backup-mock" class="backup-btn" type="button">Generer mock data</button>
+      <button id="backup-reset" class="backup-btn backup-btn--danger" type="button">Reinitialiser</button>
+    </div>
+  </aside>
+
+  <div id="admin-modal" class="admin-modal" hidden>
+    <button class="admin-modal__backdrop" type="button" data-admin-close aria-label="Fermer"></button>
+    <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+      <button class="admin-modal__close" type="button" data-admin-close aria-label="Fermer">×</button>
+      <div class="admin-modal__eyebrow">Organisateurs</div>
+      <h2 id="admin-modal-title" class="admin-modal__title">Connexion admin</h2>
+      <p id="admin-modal-copy" class="admin-modal__copy"></p>
+
+      <form id="admin-login-form" class="admin-form">
+        <label class="admin-form__label" for="admin-password">Mot de passe</label>
+        <input id="admin-password" class="admin-form__input" type="password" autocomplete="current-password" required />
+        <div id="admin-error" class="admin-form__error" aria-live="polite"></div>
+        <button id="admin-login-submit" class="backup-btn backup-btn--primary admin-form__submit" type="submit">Activer le mode admin</button>
+      </form>
+
+      <div id="admin-logged-panel" class="admin-logged-panel" hidden>
+        <div class="admin-logged-panel__text">Tu peux maintenant saisir les scores et utiliser les outils organisateurs sur cet appareil.</div>
+        <button id="admin-logout" class="backup-btn" type="button">Se deconnecter</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirm-modal" class="admin-modal" hidden>
+    <button class="admin-modal__backdrop" type="button" data-confirm-close aria-label="Annuler"></button>
+    <div class="admin-modal__dialog confirm-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+      <div class="admin-modal__eyebrow">Action admin</div>
+      <h2 id="confirm-modal-title" class="admin-modal__title">Confirmer l'action</h2>
+      <p id="confirm-modal-copy" class="admin-modal__copy"></p>
+      <div class="confirm-modal__actions">
+        <button id="confirm-modal-cancel" class="backup-btn" type="button" data-confirm-close>Annuler</button>
+        <button id="confirm-modal-submit" class="backup-btn backup-btn--primary" type="button">Confirmer</button>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
