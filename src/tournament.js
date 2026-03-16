@@ -15,10 +15,27 @@ export function allPoolMatches() {
   return list;
 }
 
+// Proportional interleave: each pool's matches are spread evenly across
+// the full schedule using fractional positioning, so no pool clusters early or late.
+function interleaveByPool(matches) {
+  const byPool = {};
+  matches.forEach(m => { (byPool[m.pool] ??= []).push(m); });
+  const pools = Object.values(byPool);
+  const total = matches.length;
+  const positioned = [];
+  pools.forEach((pool, pi) => {
+    const step = total / pool.length;
+    const offset = pi * (step / pools.length);
+    pool.forEach((m, i) => positioned.push({ m, pos: offset + i * step }));
+  });
+  positioned.sort((a, b) => a.pos - b.pos);
+  return positioned.map(p => p.m);
+}
+
 // Greedy conflict-free scheduler: 2 courts, no shared team in same slot,
 // no team plays two consecutive slots (back-to-back rest constraint)
 export function buildSchedule(matches) {
-  const rem = [...matches]; const slots = [];
+  const rem = interleaveByPool(matches); const slots = [];
   while (rem.length) {
     const prev = new Set(
       (slots[slots.length - 1] || []).flatMap(m => [m.t1, m.t2])
