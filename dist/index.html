@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GO OUEST 🎾</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎾</text></svg>" />
-  <script type="module" crossorigin src="/assets/index-DuXLQenN.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-D3GtlUzz.css">
+  <script type="module" crossorigin src="/assets/index-D5XWnY41.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BFr9jh8O.css">
 </head>
 <body>
   <header>
-    <button id="admin-access-trigger" class="admin-access-btn" type="button">Connexion admin</button>
+    <div class="admin-corner">
+      <button id="admin-access-trigger" class="admin-access-btn" type="button">Connexion admin</button>
+      <span class="sync-badge sync-badge--header" id="sync-badge">Lecture seule</span>
+    </div>
     <img src="/logo.png" alt="GO OUEST 2026" class="header-logo" />
   </header>
 
@@ -28,13 +31,11 @@
       </div>
       <div class="backup-actions" id="admin-actions" hidden>
         <button id="backup-export" class="backup-btn backup-btn--primary" type="button">Exporter JSON</button>
-        <button id="backup-mock" class="backup-btn" type="button">Generer mock data</button>
         <button id="backup-import-trigger" class="backup-btn" type="button">Importer JSON</button>
         <button id="backup-reset" class="backup-btn backup-btn--danger" type="button">Reinitialiser</button>
         <input id="backup-import-input" class="backup-file-input" type="file" accept="application/json,.json" />
       </div>
       <div class="backup-status-row">
-        <span class="sync-badge" id="sync-badge">Public</span>
         <div id="backup-status" class="backup-status" aria-live="polite"></div>
       </div>
     </section>

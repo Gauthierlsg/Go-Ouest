@@ -10,7 +10,6 @@ import {
   setAppMode,
   subscribe,
 } from './state.js';
-import { createMockTournamentState } from './mock-data.js';
 import { renderPools } from './views/pools.js';
 import { renderPlanning } from './views/planning.js';
 import { renderFinale } from './views/finale.js';
@@ -228,7 +227,6 @@ function setupAdminControls() {
 
 function setupAdminTools() {
   const exportBtn = document.getElementById('backup-export');
-  const mockBtn = document.getElementById('backup-mock');
   const importBtn = document.getElementById('backup-import-trigger');
   const importInput = document.getElementById('backup-import-input');
   const resetBtn = document.getElementById('backup-reset');
@@ -246,31 +244,6 @@ function setupAdminTools() {
     link.remove();
     URL.revokeObjectURL(url);
     setStatus('Backup JSON exporte.', 'success');
-  });
-
-  mockBtn.addEventListener('click', async () => {
-    const shouldGenerate = window.confirm(
-      'Generer des scores aleatoires pour tout le tournoi ? Cela remplacera les scores actuels.'
-    );
-    if (!shouldGenerate) return;
-
-    const nextState = createMockTournamentState();
-
-    try {
-      if (getAppMode().remote) {
-        await apiRequest(API_TOURNAMENT, {
-          method: 'POST',
-          body: { type: 'replaceState', state: nextState },
-        });
-        await refreshRemoteState({ silent: true, forceRender: true });
-      } else {
-        replaceState(nextState, { persist: true, notify: true });
-      }
-
-      setStatus('Mock data generee pour les tests.', 'success');
-    } catch (error) {
-      setStatus(error.message || 'Generation mock impossible.', 'error');
-    }
   });
 
   importBtn.addEventListener('click', () => {
@@ -443,9 +416,9 @@ function buildMetaLine(mode) {
 }
 
 function buildSyncBadge(mode) {
-  if (mode.source === 'local-dev') return 'Local dev';
-  if (!mode.remote) return 'Lecture seule';
-  return mode.admin ? 'Admin' : 'Public';
+  if (mode.source === 'local-dev') return 'Mode local';
+  if (!mode.admin) return 'Lecture seule';
+  return 'Mode admin';
 }
 
 function renderAdminModal() {
