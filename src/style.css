@@ -55,19 +55,21 @@ header::before {
   gap: 0.45rem;
 }
 .admin-access-btn {
-  border: 1px solid rgba(255,255,255,0.45);
-  background: rgba(255,255,255,0.12);
-  color: white;
+  border: 1px solid rgba(255,246,239,0.98);
+  background: rgba(255,248,242,0.94);
+  color: #6f2d09;
   border-radius: 999px;
   padding: 0.65rem 0.95rem;
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
   backdrop-filter: blur(10px);
-  transition: background 0.15s, transform 0.15s, opacity 0.15s;
+  box-shadow: 0 6px 20px rgba(60, 20, 0, 0.12);
+  transition: background 0.15s, transform 0.15s, opacity 0.15s, box-shadow 0.15s;
 }
 .admin-access-btn:hover:not(:disabled) {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.99);
+  box-shadow: 0 8px 24px rgba(60, 20, 0, 0.16);
   transform: translateY(-1px);
 }
 .admin-access-btn:disabled {
@@ -135,14 +137,14 @@ main {
   color: #166534;
 }
 .sync-badge--header {
-  background: rgba(255,255,255,0.16);
-  border-color: rgba(255,255,255,0.38);
-  color: white;
+  background: rgba(255,247,240,0.94);
+  border-color: rgba(255,243,233,0.98);
+  color: #7b360f;
 }
 .is-admin .sync-badge--header {
-  background: rgba(22, 101, 52, 0.22);
-  border-color: rgba(182, 235, 203, 0.6);
-  color: white;
+  background: rgba(236, 253, 243, 0.95);
+  border-color: rgba(210, 250, 227, 0.98);
+  color: #14532d;
 }
 .backup-btn {
   border: 1px solid #ecd8c7;
