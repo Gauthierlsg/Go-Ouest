@@ -1,11 +1,9 @@
 import { allPoolMatches, computeQualifiers, label } from '../tournament.js';
 
 const bTeam = (q) => {
-  const name = q?.team ? label(q.team) : '— À déterminer —';
-  const tag = q?.team
-    ? `<span class="m-pool-tag" style="background:${q.color}">${q.pool}${q.isWild ? ' ⭐' : ''}</span> `
-    : '';
-  return `<div class="b-team"><div>${tag}${name}</div><span class="b-sc">—</span></div>`;
+  if (!q?.team) return `<div class="b-team b-team--tbd"><span>À déterminer</span></div>`;
+  const tag = `<span class="m-pool-tag" style="background:${q.color}">${q.pool}${q.isWild ? ' ⭐' : ''}</span> `;
+  return `<div class="b-team"><div>${tag}${label(q.team)}</div><span class="b-sc">—</span></div>`;
 };
 
 const bMatch = (q1, q2) => `

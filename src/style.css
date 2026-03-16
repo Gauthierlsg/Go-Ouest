@@ -178,26 +178,26 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
 .b-round { display: flex; flex-direction: column; }
 .b-round-title {
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: var(--gray);
-  letter-spacing: 0.8px;
-  margin-bottom: 0.5rem;
-  background: #f0f0f0;
-  border-radius: 6px;
-  padding: 0.3rem 0.5rem;
+  color: var(--g1);
+  letter-spacing: 0.9px;
+  margin-bottom: 0.75rem;
+  border-bottom: 2px solid var(--g1);
+  padding-bottom: 0.3rem;
 }
 .b-round-spacer { height: 1rem; }
 
 /* Match wrapper — carries the connector pseudo-elements */
 .b-match-wrap { position: relative; }
-.b-match { background: white; border: 1px solid #e8e8e8; border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; min-width: 195px; }
-.b-team { padding: 0.6rem 0.9rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; font-size: 0.83rem; }
+.b-match { background: white; border: 1px solid #ede0d4; border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; min-width: 200px; }
+.b-team { padding: 0.6rem 0.9rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f5ece4; font-size: 0.83rem; }
 .b-team:last-child { border-bottom: none; }
 .b-team.win { background: #fff5eb; font-weight: 700; color: var(--g1); }
+.b-team--tbd { color: #c0b0a0; font-size: 0.78rem; font-style: italic; justify-content: center; }
 .b-sc { font-weight: 700; color: var(--gray); }
-.b-label-3rd { text-align: center; font-size: 0.72rem; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.25rem; }
+.b-label-3rd { text-align: center; font-size: 0.68rem; font-weight: 800; color: var(--g1); text-transform: uppercase; letter-spacing: 0.7px; margin-top: 0.5rem; border-bottom: 2px solid var(--g1); padding-bottom: 0.3rem; }
 
 /* Bracket connector lines */
 .b-pair { position: relative; display: flex; flex-direction: column; gap: 0.75rem; }
@@ -208,13 +208,13 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
   content: ''; position: absolute;
   top: 50%; right: -1.25rem;
   width: 1.25rem; height: 2px;
-  background: #e0b898; pointer-events: none;
+  background: #c8845a; pointer-events: none;
 }
 /* Vertical bar joining two stubs */
 .b-pair:not(.b-pair--solo)::after {
   content: ''; position: absolute;
   right: -1.25rem; width: 2px;
-  background: #e0b898; pointer-events: none;
+  background: #c8845a; pointer-events: none;
   top: 2.5rem;
   height: 5.75rem; /* match-h(5rem) + gap(0.75rem) */
 }
@@ -225,7 +225,7 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
   content: ''; position: absolute;
   top: 50%; left: -1.25rem;
   width: 1.25rem; height: 2px;
-  background: #e0b898; pointer-events: none;
+  background: #c8845a; pointer-events: none;
 }
 
 .trophy-box {
