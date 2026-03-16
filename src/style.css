@@ -368,8 +368,9 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
   /* Finale qualifiés */
   .qual-card { min-width: 130px; padding: 0.5rem 0.75rem; }
 
-  /* Bracket : scroll horizontal sur mobile, réduction de la largeur des matchs */
-  .b-match { min-width: 155px; }
-  .bracket { grid-template-columns: 180px 180px 180px 160px; gap: 1.5rem; min-width: 780px; }
+  /* Bracket : on garde le scroll horizontal mais on redonne de l'air aux quarts */
+  .b-match { min-width: 170px; }
+  .b-round--quarters .b-match { min-width: 200px; }
+  .bracket { grid-template-columns: 212px 188px 188px 160px; gap: 1.25rem; min-width: 800px; }
   .trophy-box { min-width: unset; }
 }
