@@ -174,18 +174,26 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
 .section-card { background: white; border-radius: 14px; box-shadow: var(--shadow); padding: 1.5rem; }
 
 .bracket-wrap {
-  --b-match-height: 152px;
-  --b-pair-gap: 0.75rem;
-  --b-group-gap: 1rem;
-  --b-sf-gap: 180px;
-  --b-connector: 1.25rem;
-  --b-semi-offset: 6px;
-  --b-final-offset: 172px;
   overflow-x: auto;
   padding-bottom: 1rem;
 }
-.bracket { display: flex; gap: 2.5rem; align-items: flex-start; min-width: 940px; padding: 0.25rem 0; }
-.b-round { display: flex; flex-direction: column; }
+.bracket-stage { --b-match-height: 152px; position: relative; width: max-content; min-width: 940px; }
+.bracket-svg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 0;
+}
+.bracket-svg path {
+  fill: none;
+  stroke: #c8845a;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.bracket { position: relative; z-index: 1; display: grid; grid-template-columns: 220px 220px 220px 180px; gap: 2.5rem; align-items: start; padding: 0.25rem 0; }
+.b-round { display: flex; flex-direction: column; width: 100%; }
 .b-round-title {
   text-align: center;
   font-size: 0.68rem;
@@ -197,13 +205,10 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
   border-bottom: 2px solid var(--g1);
   padding-bottom: 0.3rem;
 }
-.b-round-spacer { height: var(--b-group-gap); }
-.b-round--semis .b-pair--sf { margin-top: var(--b-semi-offset); }
-.b-round--finals .b-pair--final { margin-top: var(--b-final-offset); }
-.b-round--champion .trophy-box { margin-top: var(--b-final-offset); }
+.b-round-body { position: relative; width: 100%; }
 
 /* Match wrapper — carries the connector pseudo-elements */
-.b-match-wrap { position: relative; }
+.b-match-wrap { position: absolute; inset-inline: 0; }
 .b-match {
   display: grid;
   grid-template-rows: 32px 60px 60px;
@@ -267,39 +272,22 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
   background: #f7f1eb;
   color: #baa89a;
 }
-.b-label-3rd { text-align: center; font-size: 0.68rem; font-weight: 800; color: var(--g1); text-transform: uppercase; letter-spacing: 0.7px; margin-top: 1.5rem; border-bottom: 2px solid var(--g1); padding-bottom: 0.3rem; }
-.b-pair--third { margin-top: 0.5rem; }
-
-/* Bracket connector lines */
-.b-pair { position: relative; display: flex; flex-direction: column; gap: var(--b-pair-gap); }
-.b-pair--sf { gap: var(--b-sf-gap); }
-
-/* Right horizontal stub (non-solo pairs only) */
-.b-pair:not(.b-pair--solo) .b-match-wrap::after {
-  content: ''; position: absolute;
-  top: 50%; right: calc(-1 * var(--b-connector));
-  width: var(--b-connector); height: 2px;
-  background: #c8845a; pointer-events: none;
-}
-/* Vertical bar joining two stubs */
-.b-pair:not(.b-pair--solo)::after {
-  content: ''; position: absolute;
-  right: calc(-1 * var(--b-connector)); width: 2px;
-  background: #c8845a; pointer-events: none;
-  top: calc(var(--b-match-height) / 2);
-  height: calc(var(--b-match-height) + var(--b-pair-gap));
-}
-.b-pair--sf::after { height: calc(var(--b-match-height) + var(--b-sf-gap)); }
-
-/* Left incoming stub on all rounds except the first */
-.b-round:not(:first-child) .b-match-wrap::before {
-  content: ''; position: absolute;
-  top: 50%; left: calc(-1 * var(--b-connector));
-  width: var(--b-connector); height: 2px;
-  background: #c8845a; pointer-events: none;
+.b-label-3rd {
+  position: absolute;
+  inset-inline: 0;
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--g1);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  border-bottom: 2px solid var(--g1);
+  padding-bottom: 0.3rem;
 }
 
 .trophy-box {
+  position: absolute;
+  inset-inline: 0;
   background: linear-gradient(135deg, #ffd700, #ffa000);
   border-radius: 12px;
   padding: 1.5rem;
@@ -369,5 +357,6 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
 
   /* Bracket : scroll horizontal sur mobile, réduction de la largeur des matchs */
   .b-match { min-width: 155px; }
+  .bracket { grid-template-columns: 180px 180px 180px 160px; gap: 1.5rem; min-width: 780px; }
   .trophy-box { min-width: unset; }
 }
