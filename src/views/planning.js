@@ -1,6 +1,6 @@
 import { SLOT_MIN, START_HOUR } from '../data.js';
 import { allPoolMatches, buildSchedule, label } from '../tournament.js';
-import { getScore, isReadOnlyMode, setScore } from '../state.js';
+import { getScore, setScore } from '../state.js';
 
 function sanitizeScore(value) {
   return value.replace(/\D+/g, '').slice(0, 2);
@@ -13,7 +13,6 @@ function fmtTime(slotIdx) {
 }
 
 export function renderPlanning(container) {
-  const readOnly = isReadOnlyMode();
   const matches = allPoolMatches();
   const slots = buildSchedule(matches);
   const totalMin = slots.length * SLOT_MIN;
@@ -32,11 +31,11 @@ export function renderPlanning(container) {
         <div class="m-score">
           <input class="sc-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
             value="${sc.s1 ?? ''}" placeholder="—"
-            data-mid="${m.id}" data-side="s1" ${readOnly ? 'disabled' : ''}>
+            data-mid="${m.id}" data-side="s1">
           <span class="sc-sep">:</span>
           <input class="sc-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
             value="${sc.s2 ?? ''}" placeholder="—"
-            data-mid="${m.id}" data-side="s2" ${readOnly ? 'disabled' : ''}>
+            data-mid="${m.id}" data-side="s2">
         </div>
       </div>`;
   };
@@ -70,7 +69,6 @@ export function renderPlanning(container) {
   if (container.dataset.scoreBound === 'true') return;
 
   container.addEventListener('input', e => {
-    if (isReadOnlyMode()) return;
     const inp = e.target;
     if (!inp.dataset.mid) return;
     const value = sanitizeScore(inp.value);
@@ -79,7 +77,6 @@ export function renderPlanning(container) {
   });
 
   container.addEventListener('change', e => {
-    if (isReadOnlyMode()) return;
     const inp = e.target;
     if (!inp.dataset.mid) return;
     const value = sanitizeScore(inp.value);
@@ -88,7 +85,6 @@ export function renderPlanning(container) {
   });
 
   container.addEventListener('focusout', e => {
-    if (isReadOnlyMode()) return;
     const inp = e.target;
     if (!inp.dataset.mid) return;
     const value = sanitizeScore(inp.value);

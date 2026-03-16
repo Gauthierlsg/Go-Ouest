@@ -1,5 +1,5 @@
 import { allPoolMatches, computeKnockout, label } from '../tournament.js';
-import { getScore, isReadOnlyMode, setScore } from '../state.js';
+import { getScore, setScore } from '../state.js';
 
 const BRACKET_CONNECTIONS = [
   ['QF1', 'SF1'],
@@ -52,7 +52,6 @@ const bMatch = (match, sideLabel) => `
   </div>`;
 
 export function renderFinale(container) {
-  const readOnly = isReadOnlyMode();
   const matches = allPoolMatches();
   const { qualifiers, rounds, champion } = computeKnockout(matches);
   const [q0, q1, q2, q3, q4, q5, q6, q7] = qualifiers;
@@ -82,27 +81,27 @@ export function renderFinale(container) {
             <div class="b-round b-round--quarters">
               <div class="b-round-title">Quarts de finale</div>
               <div class="b-round-body">
-                ${bMatchWithMode(rounds.quarterfinals[0], `${q0?.pool ?? '—'} vs ${q7?.pool ?? '—'}`, readOnly)}
-                ${bMatchWithMode(rounds.quarterfinals[1], `${q1?.pool ?? '—'} vs ${q6?.pool ?? '—'}`, readOnly)}
-                ${bMatchWithMode(rounds.quarterfinals[2], `${q2?.pool ?? '—'} vs ${q5?.pool ?? '—'}`, readOnly)}
-                ${bMatchWithMode(rounds.quarterfinals[3], `${q3?.pool ?? '—'} vs ${q4?.pool ?? '—'}`, readOnly)}
+                ${bMatch(rounds.quarterfinals[0], `${q0?.pool ?? '—'} vs ${q7?.pool ?? '—'}`)}
+                ${bMatch(rounds.quarterfinals[1], `${q1?.pool ?? '—'} vs ${q6?.pool ?? '—'}`)}
+                ${bMatch(rounds.quarterfinals[2], `${q2?.pool ?? '—'} vs ${q5?.pool ?? '—'}`)}
+                ${bMatch(rounds.quarterfinals[3], `${q3?.pool ?? '—'} vs ${q4?.pool ?? '—'}`)}
               </div>
             </div>
 
             <div class="b-round b-round--semis">
               <div class="b-round-title">Demi-finales</div>
               <div class="b-round-body">
-                ${bMatchWithMode(rounds.semifinals[0], 'Vainqueurs QF1/QF2', readOnly)}
-                ${bMatchWithMode(rounds.semifinals[1], 'Vainqueurs QF3/QF4', readOnly)}
+                ${bMatch(rounds.semifinals[0], 'Vainqueurs QF1/QF2')}
+                ${bMatch(rounds.semifinals[1], 'Vainqueurs QF3/QF4')}
               </div>
             </div>
 
             <div class="b-round b-round--finals">
               <div class="b-round-title">Finale</div>
               <div class="b-round-body">
-                ${bMatchWithMode(rounds.finals[0], 'Vainqueurs SF', readOnly)}
+                ${bMatch(rounds.finals[0], 'Vainqueurs SF')}
                 <div class="b-label-3rd">3ème place</div>
-                ${bMatchWithMode(rounds.finals[1], 'Perdants SF', readOnly)}
+                ${bMatch(rounds.finals[1], 'Perdants SF')}
               </div>
             </div>
 
@@ -133,7 +132,6 @@ export function renderFinale(container) {
   if (container.dataset.scoreBound === 'true') return;
 
   container.addEventListener('input', e => {
-    if (isReadOnlyMode()) return;
     const inp = e.target;
     if (!inp.dataset.mid) return;
     const value = sanitizeScore(inp.value);
@@ -142,7 +140,6 @@ export function renderFinale(container) {
   });
 
   container.addEventListener('change', e => {
-    if (isReadOnlyMode()) return;
     const inp = e.target;
     if (!inp.dataset.mid) return;
     const value = sanitizeScore(inp.value);
@@ -151,7 +148,6 @@ export function renderFinale(container) {
   });
 
   container.addEventListener('focusout', e => {
-    if (isReadOnlyMode()) return;
     const inp = e.target;
     if (!inp.dataset.mid) return;
     const value = sanitizeScore(inp.value);
@@ -302,18 +298,4 @@ function getAnchor(node, side, stageRect) {
     x: Math.round((side === 'left' ? rect.left : rect.right) - stageRect.left),
     y: Math.round(rect.top + rect.height / 2 - stageRect.top),
   };
-}
-
-function bMatchWithMode(match, sideLabel, readOnly) {
-  return `
-    <div class="b-match-wrap" data-match-id="${match.id}">
-      <div class="b-match">
-        <div class="b-match-head">
-          <span>${match.label}</span>
-          ${match.isTie ? '<span class="b-error">Pas de match nul</span>' : `<span class="b-side-label">${sideLabel}</span>`}
-        </div>
-        ${bTeam(match.sides[0], match.id, 's1', !match.ready || readOnly)}
-        ${bTeam(match.sides[1], match.id, 's2', !match.ready || readOnly)}
-      </div>
-    </div>`;
 }

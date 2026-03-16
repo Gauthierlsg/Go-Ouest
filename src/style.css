@@ -75,99 +75,6 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-.backup-card {
-  background: white;
-  border-radius: 14px;
-  box-shadow: var(--shadow);
-  padding: 1rem 1.1rem;
-  margin-bottom: 1.25rem;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.85rem 1rem;
-  align-items: center;
-}
-.backup-title {
-  font-size: 0.95rem;
-  font-weight: 800;
-}
-.backup-meta {
-  color: var(--gray);
-  font-size: 0.82rem;
-  margin-top: 0.2rem;
-}
-.backup-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.6rem;
-}
-.backup-btn {
-  border: 1px solid #ecd8c7;
-  background: #fffaf6;
-  color: #8a5b33;
-  border-radius: 10px;
-  padding: 0.65rem 0.95rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
-}
-.backup-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(194, 69, 10, 0.12);
-  border-color: #e7bf9e;
-}
-.backup-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-.backup-btn--primary {
-  background: linear-gradient(135deg, #b83a07, #e8670e);
-  border-color: transparent;
-  color: white;
-}
-.backup-btn--danger {
-  background: #fff3f0;
-  color: #b42318;
-  border-color: #f2c4bd;
-}
-.backup-file-input { display: none; }
-.backup-status {
-  grid-column: 1 / -1;
-  min-height: 1.2rem;
-  font-size: 0.82rem;
-  color: var(--gray);
-}
-.backup-status[data-kind="success"] { color: #166534; }
-.backup-status[data-kind="error"] { color: #b42318; }
-.share-panel {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.85rem 1rem;
-  align-items: center;
-  padding-top: 0.25rem;
-  border-top: 1px solid #f3e7dd;
-}
-.share-panel__title {
-  font-size: 0.85rem;
-  font-weight: 800;
-  color: var(--g1);
-}
-.share-panel__meta {
-  margin-top: 0.15rem;
-  color: var(--gray);
-  font-size: 0.8rem;
-}
-.share-panel__actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.6rem;
-}
-
 /* ── Banners ─────────────────────────────────────────── */
 .banner {
   background: #fff8e1;
@@ -434,11 +341,6 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
   main { padding: 0.75rem; }
   .courts-grid { grid-template-columns: 1fr; }
   .pools-grid { grid-template-columns: 1fr; }
-  .backup-card { grid-template-columns: 1fr; }
-  .backup-actions { justify-content: flex-start; }
-  .backup-btn { flex: 1 1 calc(50% - 0.4rem); }
-  .share-panel { grid-template-columns: 1fr; }
-  .share-panel__actions { justify-content: flex-start; }
 
   /* Poules — cacher J/V/D, garder # · Duo · Pts */
   .stand-table th:nth-child(3), .stand-table td:nth-child(3),

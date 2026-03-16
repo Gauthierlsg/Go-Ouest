@@ -16,8 +16,6 @@ Application web de gestion de tournoi de tennis mixte en double.
 - Bracket de phase finale avec arbre visuel QF → SF → Finale
 - Saisie des scores directement sur l'interface
 - Persistance des scores en localStorage
-- Export / import JSON des scores + réinitialisation rapide
-- Partage multi-appareils via lien snapshot en lecture seule
 - Interface mobile-first (optimisée téléphone pour le jour J)
 
 ## Stack
