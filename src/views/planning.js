@@ -99,16 +99,37 @@ export function renderPlanning(container) {
       <span class="section-title">Planning</span>
       <span class="planning-meta">Début ${String(START_HOUR).padStart(2, '0')}h00 · matchs ${MATCH_DURATION_MIN} min + ${TRANSITION_MIN} min transition · pause ${KNOCKOUT_BREAK_MIN} min avant les quarts</span>
     </div>
-    <div class="courts-grid">
-      <div class="court-card">
-        <div class="court-hdr c1-hdr">🎾 Terrain 1</div>
-        ${planning.courts[0].map(row => renderRow(row, readOnly)).join('')}
+    <section class="planning-section">
+      <div class="planning-section__header">
+        <div>
+          <div class="planning-section__eyebrow">Bloc 1</div>
+          <h3 class="planning-section__title">Phase de poules</h3>
+        </div>
+        <div class="planning-section__meta">${poolMatches.length} matchs · fin estimée ${fmtClock(planning.poolEndMinutes)}</div>
       </div>
-      <div class="court-card">
-        <div class="court-hdr c2-hdr">🎾 Terrain 2</div>
-        ${planning.courts[1].map(row => renderRow(row, readOnly)).join('')}
+      ${renderCourtsGrid(planning.poolCourts, readOnly)}
+    </section>
+
+    <div class="planning-separator" role="separator" aria-label="Pause avant la phase finale">
+      <div class="planning-separator__line"></div>
+      <div class="planning-separator__badge">
+        <span class="planning-separator__eyebrow">Transition</span>
+        <strong>${fmtClock(planning.poolEndMinutes)} · Pause ${KNOCKOUT_BREAK_MIN} min</strong>
+        <span>Calcul des qualifiés puis lancement de la phase finale à ${fmtClock(planning.knockoutStart)}</span>
       </div>
-    </div>`;
+      <div class="planning-separator__line"></div>
+    </div>
+
+    <section class="planning-section planning-section--knockout">
+      <div class="planning-section__header">
+        <div>
+          <div class="planning-section__eyebrow">Bloc 2</div>
+          <h3 class="planning-section__title">Phase finale</h3>
+        </div>
+        <div class="planning-section__meta">8 matchs à élimination directe · fin estimée ${fmtClock(planning.endMinutes)}</div>
+      </div>
+      ${renderCourtsGrid(planning.knockoutCourts, readOnly)}
+    </section>`;
 
   if (container.dataset.scoreBound === 'true') return;
 
@@ -140,24 +161,22 @@ export function renderPlanning(container) {
 }
 
 function buildPlanningRows(poolMatches, poolSlots) {
-  const courts = [[], []];
+  const poolCourts = [[], []];
   const startMinutes = START_HOUR * 60;
 
   poolSlots.forEach((slot, slotIdx) => {
     const slotStart = startMinutes + slotIdx * SLOT_MIN;
-    courts[0].push(slot[0] ? buildPoolRow(slot[0], slotStart) : buildEmptyRow(slotStart));
-    courts[1].push(slot[1] ? buildPoolRow(slot[1], slotStart) : buildEmptyRow(slotStart));
+    poolCourts[0].push(slot[0] ? buildPoolRow(slot[0], slotStart) : buildEmptyRow(slotStart));
+    poolCourts[1].push(slot[1] ? buildPoolRow(slot[1], slotStart) : buildEmptyRow(slotStart));
   });
 
   const poolEndMinutes = startMinutes + poolSlots.length * SLOT_MIN;
-  courts[0].push(buildBreakRow(poolEndMinutes));
-  courts[1].push(buildBreakRow(poolEndMinutes));
-
   const knockoutStart = poolEndMinutes + KNOCKOUT_BREAK_MIN;
   const { rounds } = computeKnockout(poolMatches);
   const matchesById = Object.fromEntries(
     [...rounds.quarterfinals, ...rounds.semifinals, ...rounds.finals].map(match => [match.id, match])
   );
+  const knockoutCourts = [[], []];
 
   const knockoutSlots = [
     ['QF1', 'QF2'],
@@ -168,12 +187,15 @@ function buildPlanningRows(poolMatches, poolSlots) {
 
   knockoutSlots.forEach((slot, slotIdx) => {
     const slotStart = knockoutStart + slotIdx * SLOT_MIN;
-    courts[0].push(buildKnockoutRow(matchesById[slot[0]], slotStart, slot[0]));
-    courts[1].push(buildKnockoutRow(matchesById[slot[1]], slotStart, slot[1]));
+    knockoutCourts[0].push(buildKnockoutRow(matchesById[slot[0]], slotStart, slot[0]));
+    knockoutCourts[1].push(buildKnockoutRow(matchesById[slot[1]], slotStart, slot[1]));
   });
 
   return {
-    courts,
+    poolCourts,
+    knockoutCourts,
+    poolEndMinutes,
+    knockoutStart,
     endMinutes: knockoutStart + knockoutSlots.length * SLOT_MIN,
   };
 }
@@ -209,15 +231,6 @@ function buildKnockoutRow(match, startMinutes, id) {
   };
 }
 
-function buildBreakRow(startMinutes) {
-  return {
-    type: 'break',
-    startMinutes,
-    label: 'Pause avant la phase finale',
-    detail: `${KNOCKOUT_BREAK_MIN} min · calcul des qualifiés`,
-  };
-}
-
 function buildEmptyRow(startMinutes) {
   return {
     type: 'empty',
@@ -229,23 +242,26 @@ function sideLabel(side, fallback) {
   return side?.team ? label(side.team) : fallback;
 }
 
+function renderCourtsGrid(courts, readOnly) {
+  return `
+    <div class="courts-grid">
+      <div class="court-card">
+        <div class="court-hdr c1-hdr">🎾 Terrain 1</div>
+        ${courts[0].map(row => renderRow(row, readOnly)).join('')}
+      </div>
+      <div class="court-card">
+        <div class="court-hdr c2-hdr">🎾 Terrain 2</div>
+        ${courts[1].map(row => renderRow(row, readOnly)).join('')}
+      </div>
+    </div>`;
+}
+
 function renderRow(row, readOnly) {
   if (row.type === 'empty') {
     return `
       <div class="empty-slot">
         <span class="m-time">${fmtClock(row.startMinutes)}</span>
         <span>—</span>
-      </div>`;
-  }
-
-  if (row.type === 'break') {
-    return `
-      <div class="planning-break-row">
-        <span class="m-time">${fmtClock(row.startMinutes)}</span>
-        <div class="m-body">
-          <div class="planning-break-title">${row.label}</div>
-          <div class="planning-break-meta">${row.detail}</div>
-        </div>
       </div>`;
   }
 
