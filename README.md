@@ -18,6 +18,7 @@ Application web de gestion de tournoi de tennis mixte en double.
 - Connexion admin simple par mot de passe pour les organisateurs
 - Saisie des scores synchronisée entre appareils via Vercel Blob
 - Export / import JSON des scores + réinitialisation rapide côté admin
+- Génération de mock data côté admin pour tester rapidement tout le tournoi
 - Interface mobile-first (optimisée téléphone pour le jour J)
 
 ## Stack
