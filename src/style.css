@@ -370,7 +370,7 @@ main {
 .tourney-meta { color: #576270; font-size: 0.8rem; margin-bottom: 0.75rem; }
 
 /* ── Pool cards ──────────────────────────────────────── */
-.pools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; }
+.pools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(305px, 1fr)); gap: 1.25rem; }
 .pool-card { background: white; border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
 .pool-hdr {
   padding: 0.9rem 1.1rem;
@@ -389,9 +389,9 @@ main {
   font-weight: 700;
 }
 
-.stand-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+.stand-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 0.81rem; }
 .stand-table th {
-  padding: 0.45rem 0.8rem;
+  padding: 0.45rem 0.55rem;
   background: #f3f4f6;
   color: #4b5563;
   font-weight: 700;
@@ -402,11 +402,31 @@ main {
 }
 .stand-table th:last-child,
 .stand-table td:last-child { text-align: center; }
-.stand-table th:nth-child(6),
-.stand-table td:nth-child(6) {
+.stand-table th:first-child,
+.stand-table td:first-child {
+  width: 2.6rem;
   text-align: center;
 }
-.stand-table td { padding: 0.55rem 0.8rem; border-top: 1px solid #f0f0f0; vertical-align: middle; }
+.stand-table th:nth-child(3),
+.stand-table td:nth-child(3),
+.stand-table th:nth-child(4),
+.stand-table td:nth-child(4),
+.stand-table th:nth-child(5),
+.stand-table td:nth-child(5) {
+  width: 2.1rem;
+  text-align: center;
+}
+.stand-table th:nth-child(6),
+.stand-table td:nth-child(6) {
+  width: 3rem;
+  text-align: center;
+}
+.stand-table th:nth-child(7),
+.stand-table td:nth-child(7) {
+  width: 3.2rem;
+  text-align: center;
+}
+.stand-table td { padding: 0.55rem 0.55rem; border-top: 1px solid #f0f0f0; vertical-align: middle; }
 .stand-table tr.q td { background: #fff5eb; }
 .stand-table tr:hover td { background: #fff9f5; }
 
@@ -416,8 +436,8 @@ main {
 .r3 { background: #cd7f32; color: white; }
 .rn { background: #e9ecef; color: #555; }
 
-.duo-name { font-weight: 600; font-size: 0.85rem; }
-.pts-badge { background: var(--g1); color: white; border-radius: 6px; padding: 0.1rem 0.5rem; font-weight: 700; font-size: 0.8rem; }
+.duo-name { display: block; font-weight: 600; font-size: 0.83rem; line-height: 1.25; }
+.pts-badge { background: var(--g1); color: white; border-radius: 6px; padding: 0.1rem 0.38rem; font-weight: 700; font-size: 0.76rem; }
 
 /* ── Planning ────────────────────────────────────────── */
 .planning-header { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
