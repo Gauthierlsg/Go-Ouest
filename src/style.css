@@ -82,6 +82,8 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
 .banner.info { background: #fef3e8; border-color: #f0a060; }
 .q-sample { background: #fff5eb; border: 1px solid #e8670e; padding: 0 4px; border-radius: 3px; font-size: 0.8rem; }
 
+.tourney-meta { color: var(--gray); font-size: 0.8rem; margin-bottom: 0.75rem; }
+
 /* ── Pool cards ──────────────────────────────────────── */
 .pools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; }
 .pool-card { background: white; border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }

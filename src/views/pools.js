@@ -1,4 +1,4 @@
-import { POOLS } from '../data.js';
+import { DUOS, POOLS } from '../data.js';
 import { label, allPoolMatches, poolStandings } from '../tournament.js';
 
 export function renderPools(container) {
@@ -32,10 +32,11 @@ export function renderPools(container) {
   };
 
   container.innerHTML = `
+    <div class="tourney-meta">${DUOS.length} duos · ${POOLS.length} poules · ${matches.length} matchs · 2 terrains · 6h</div>
     <div class="banner info">
       ℹ️ <div>
         <strong>Format :</strong> 7 poules → top 1 de chaque poule + meilleur 2ème = <strong>8 qualifiés</strong>.
-        Ligne <span class="q-sample">verte</span> = qualifié provisoire.
+        Ligne <span class="q-sample">orange</span> = qualifié provisoire.
       </div>
     </div>
     <div class="pools-grid">${POOLS.map(poolCard).join('')}</div>`;

@@ -5,12 +5,6 @@ import { renderPools } from './views/pools.js';
 import { renderPlanning } from './views/planning.js';
 import { renderFinale } from './views/finale.js';
 
-// Stats header
-const matches = allPoolMatches();
-document.getElementById('stat-duos').textContent = DUOS.length;
-document.getElementById('stat-pools').textContent = POOLS.length;
-document.getElementById('stat-matches').textContent = matches.length;
-
 // Tab routing
 const views = {
   poules:   () => renderPools(document.getElementById('poules')),
