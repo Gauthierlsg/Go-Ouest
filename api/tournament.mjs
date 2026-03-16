@@ -2,6 +2,7 @@ import { isAdminRequest } from './_lib/session.mjs';
 import {
   isStorageConfigured,
   mutateTournamentState,
+  mutateTournamentStateWithOptions,
   readTournamentDocument,
   sanitizeImportedState,
 } from './_lib/storage.mjs';
@@ -63,10 +64,14 @@ async function handleAction(action) {
       });
 
     case 'reset':
-      return mutateTournamentState(() => ({ scores: {} }));
+      return mutateTournamentStateWithOptions(() => ({ scores: {} }), {
+        overwriteOnConflict: true,
+      });
 
     case 'replaceState':
-      return mutateTournamentState(() => sanitizeImportedState(action.state));
+      return mutateTournamentStateWithOptions(() => sanitizeImportedState(action.state), {
+        overwriteOnConflict: true,
+      });
 
     default:
       throw new Error('Action tournoi inconnue.');

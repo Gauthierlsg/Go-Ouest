@@ -47,25 +47,26 @@ export async function readTournamentDocument() {
 }
 
 export async function mutateTournamentState(mutator) {
+  return mutateTournamentStateWithOptions(mutator);
+}
+
+export async function mutateTournamentStateWithOptions(mutator, options = {}) {
   ensureStorageConfigured();
+  const { overwriteOnConflict = false } = options;
 
   let lastError = null;
+  let lastNextState = null;
 
   for (let attempt = 0; attempt < MAX_WRITE_RETRIES; attempt += 1) {
     const current = await readTournamentDocument();
     const nextState = sanitizeState(mutator(cloneState(current.state)));
+    lastNextState = nextState;
     const updatedAt = new Date().toISOString();
-    const body = JSON.stringify({ state: nextState, updatedAt }, null, 2);
 
     try {
-      const result = await put(STATE_PATHNAME, body, {
-        access: 'private',
-        token: process.env.BLOB_READ_WRITE_TOKEN,
-        addRandomSuffix: false,
-        allowOverwrite: true,
-        contentType: 'application/json',
-        cacheControlMaxAge: 60,
-        ifMatch: current.etag || undefined,
+      const result = await writeTournamentDocument(nextState, {
+        expectedEtag: current.etag || undefined,
+        updatedAt,
       });
 
       return {
@@ -81,6 +82,16 @@ export async function mutateTournamentState(mutator) {
       }
       throw error;
     }
+  }
+
+  if (overwriteOnConflict && lastError instanceof BlobPreconditionFailedError && lastNextState) {
+    const updatedAt = new Date().toISOString();
+    const result = await writeTournamentDocument(lastNextState, { updatedAt });
+    return {
+      state: lastNextState,
+      updatedAt,
+      etag: result.etag,
+    };
   }
 
   if (lastError instanceof BlobPreconditionFailedError) {
@@ -179,6 +190,21 @@ function ensureStorageConfigured() {
   if (!isStorageConfigured()) {
     throw new Error('BLOB_READ_WRITE_TOKEN manquant pour la synchro du tournoi.');
   }
+}
+
+async function writeTournamentDocument(nextState, options = {}) {
+  const { expectedEtag, updatedAt = new Date().toISOString() } = options;
+  const body = JSON.stringify({ state: nextState, updatedAt }, null, 2);
+
+  return put(STATE_PATHNAME, body, {
+    access: 'private',
+    token: process.env.BLOB_READ_WRITE_TOKEN,
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    contentType: 'application/json',
+    cacheControlMaxAge: 60,
+    ifMatch: expectedEtag,
+  });
 }
 
 function wait(durationMs) {
