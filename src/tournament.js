@@ -33,20 +33,24 @@ function interleaveByPool(matches) {
 }
 
 // Greedy conflict-free scheduler: 2 courts, no shared team in same slot,
-// no team plays two consecutive slots (back-to-back rest constraint)
+// 2-slot rest minimum (a team must skip at least 2 slots before replaying).
+// 3-pass: pass 0 = full 2-slot rest, pass 1 = relax to 1-slot rest, pass 2 = no rest constraint.
 export function buildSchedule(matches) {
   const rem = interleaveByPool(matches); const slots = [];
   while (rem.length) {
-    const prev = new Set(
+    const rested2 = new Set([
+      ...(slots[slots.length - 1] || []).flatMap(m => [m.t1, m.t2]),
+      ...(slots[slots.length - 2] || []).flatMap(m => [m.t1, m.t2]),
+    ]);
+    const rested1 = new Set(
       (slots[slots.length - 1] || []).flatMap(m => [m.t1, m.t2])
     );
     const used = new Set(); const slot = [];
-    // Two passes: first avoid back-to-back, then relax if needed
-    for (let pass = 0; pass < 2 && slot.length < 2; pass++) {
+    for (let pass = 0; pass < 3 && slot.length < 2; pass++) {
+      const blocked = pass === 0 ? rested2 : pass === 1 ? rested1 : new Set();
       for (let i = 0; i < rem.length && slot.length < 2; i++) {
         const m = rem[i];
-        const backToBack = pass === 0 && (prev.has(m.t1) || prev.has(m.t2));
-        if (!used.has(m.t1) && !used.has(m.t2) && !backToBack) {
+        if (!used.has(m.t1) && !used.has(m.t2) && !blocked.has(m.t1) && !blocked.has(m.t2)) {
           slot.push(m); used.add(m.t1); used.add(m.t2);
           rem.splice(i--, 1);
         }
