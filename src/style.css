@@ -42,8 +42,6 @@ header::before {
   object-fit: contain;
   position: relative;
   z-index: 1;
-  filter: invert(1) saturate(0) brightness(3);
-  mix-blend-mode: screen;
 }
 .admin-corner {
   position: absolute;
