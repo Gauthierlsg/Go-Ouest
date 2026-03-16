@@ -64,35 +64,25 @@ function goTab(id) {
 }
 
 async function boot() {
-  const remoteReady = await connectRemote();
+  const sessionState = await fetchAdminSessionState();
+  const remoteReady = await connectRemote(sessionState);
 
   if (!remoteReady) {
-    enableLocalFallback(remoteBootError);
+    enableLocalFallback(remoteBootError, sessionState);
   }
 }
 
-async function connectRemote() {
+async function connectRemote(sessionState) {
   try {
     const tournament = await apiRequest(API_TOURNAMENT);
     replaceState(tournament.state, { persist: true, notify: false });
 
-    let admin = false;
-    let authConfigured = true;
-    try {
-      const session = await apiRequest(API_ADMIN_SESSION);
-      admin = Boolean(session.admin);
-      authConfigured = session.configured !== false;
-    } catch (error) {
-      authConfigured = error.status === 503 ? false : true;
-      admin = false;
-    }
-
     setAppMode({
       source: 'remote',
       remote: true,
-      admin,
-      readOnly: !admin,
-      authConfigured,
+      admin: sessionState.admin,
+      readOnly: !sessionState.admin,
+      authConfigured: sessionState.authConfigured,
       lastRemoteUpdate: tournament.updatedAt ?? null,
     });
 
@@ -124,7 +114,22 @@ async function connectRemote() {
   }
 }
 
-function enableLocalFallback(error) {
+async function fetchAdminSessionState() {
+  try {
+    const session = await apiRequest(API_ADMIN_SESSION);
+    return {
+      admin: Boolean(session.admin),
+      authConfigured: session.configured !== false,
+    };
+  } catch (error) {
+    return {
+      admin: false,
+      authConfigured: error.status === 503 ? false : true,
+    };
+  }
+}
+
+function enableLocalFallback(error, sessionState) {
   const localDev = isLocalDev();
   if (localDev) {
     setAppMode({
@@ -144,7 +149,7 @@ function enableLocalFallback(error) {
     remote: false,
     admin: false,
     readOnly: true,
-    authConfigured: false,
+    authConfigured: sessionState?.authConfigured ?? false,
     lastRemoteUpdate: null,
   });
 
@@ -376,7 +381,7 @@ function syncUi() {
   meta.textContent = buildMetaLine(mode);
   syncBadge.textContent = buildSyncBadge(mode);
   trigger.textContent = mode.admin ? 'Admin connecte' : 'Connexion admin';
-  trigger.disabled = adminBusy || !isAdminAccessAvailable(mode);
+  trigger.disabled = adminBusy;
 
   renderAdminModal();
 }
@@ -433,8 +438,9 @@ function renderAdminModal() {
   const submit = document.getElementById('admin-login-submit');
   const logoutBtn = document.getElementById('admin-logout');
   const adminAccessAvailable = isAdminAccessAvailable(mode);
+  const canSubmitLogin = canSubmitAdminLogin(mode);
 
-  submit.disabled = adminBusy || !adminAccessAvailable;
+  submit.disabled = adminBusy || !canSubmitLogin;
   logoutBtn.disabled = adminBusy;
 
   if (mode.admin) {
@@ -450,12 +456,14 @@ function renderAdminModal() {
     logoutBtn.textContent = mode.source === 'local-dev' ? 'Fermer' : 'Se deconnecter';
   } else {
     title.textContent = 'Connexion admin';
-    copy.textContent = !adminAccessAvailable
-      ? 'La connexion admin n’est pas disponible sur cet environnement pour le moment.'
-      : 'Entrez le mot de passe organisateurs pour debloquer la saisie sur cet appareil.';
-    form.hidden = false;
+    copy.textContent = !mode.authConfigured
+      ? 'La connexion admin n’est pas encore configuree sur ce deploiement.'
+      : !mode.remote
+        ? 'Le service de synchronisation est indisponible pour le moment. La connexion admin redevient possible des que ce service revient.'
+        : 'Entrez le mot de passe organisateurs pour debloquer la saisie sur cet appareil.';
+    form.hidden = !canSubmitLogin;
     loggedPanel.hidden = true;
-    input.disabled = adminBusy || !adminAccessAvailable;
+    input.disabled = adminBusy || !canSubmitLogin;
     logoutBtn.textContent = 'Se deconnecter';
   }
 
@@ -540,6 +548,11 @@ function isLocalDev() {
 
 function isAdminAccessAvailable(mode) {
   if (mode.admin) return true;
+  if (mode.source === 'local-dev') return true;
+  return mode.authConfigured;
+}
+
+function canSubmitAdminLogin(mode) {
   if (mode.source === 'local-dev') return true;
   return mode.remote && mode.authConfigured;
 }
