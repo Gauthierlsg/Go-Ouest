@@ -69,7 +69,7 @@
           value="${t[n]??""}" placeholder="—"
           data-mid="${s}" data-side="${n}" ${a?"disabled":""}>
       </div>
-    </div>`},v=(e,s)=>`
+    </div>`},m=(e,s)=>`
   <div class="b-match-wrap">
     <div class="b-match">
       <div class="b-match-head">
@@ -98,43 +98,43 @@
         <div class="bracket">
 
           <!-- Quarts de finale : 2 paires de 2 matchs -->
-          <div class="b-round">
+          <div class="b-round b-round--quarters">
             <div class="b-round-title">Quarts de finale</div>
             <div class="b-pair">
-              ${v(a.quarterfinals[0],`${(i==null?void 0:i.pool)??"—"} vs ${(g==null?void 0:g.pool)??"—"}`)}
-              ${v(a.quarterfinals[1],`${(r==null?void 0:r.pool)??"—"} vs ${(c==null?void 0:c.pool)??"—"}`)}
+              ${m(a.quarterfinals[0],`${(i==null?void 0:i.pool)??"—"} vs ${(g==null?void 0:g.pool)??"—"}`)}
+              ${m(a.quarterfinals[1],`${(r==null?void 0:r.pool)??"—"} vs ${(c==null?void 0:c.pool)??"—"}`)}
             </div>
             <div class="b-round-spacer"></div>
             <div class="b-pair">
-              ${v(a.quarterfinals[2],`${(o==null?void 0:o.pool)??"—"} vs ${(l==null?void 0:l.pool)??"—"}`)}
-              ${v(a.quarterfinals[3],`${(p==null?void 0:p.pool)??"—"} vs ${(d==null?void 0:d.pool)??"—"}`)}
+              ${m(a.quarterfinals[2],`${(o==null?void 0:o.pool)??"—"} vs ${(l==null?void 0:l.pool)??"—"}`)}
+              ${m(a.quarterfinals[3],`${(p==null?void 0:p.pool)??"—"} vs ${(d==null?void 0:d.pool)??"—"}`)}
             </div>
           </div>
 
           <!-- Demi-finales : 1 paire de 2 matchs, alignée avec les QF -->
-          <div class="b-round">
+          <div class="b-round b-round--semis">
             <div class="b-round-title">Demi-finales</div>
-            <div class="b-pair b-pair--sf" style="margin-top:3rem">
-              ${v(a.semifinals[0],"Vainqueurs QF1/QF2")}
-              ${v(a.semifinals[1],"Vainqueurs QF3/QF4")}
+            <div class="b-pair b-pair--sf">
+              ${m(a.semifinals[0],"Vainqueurs QF1/QF2")}
+              ${m(a.semifinals[1],"Vainqueurs QF3/QF4")}
             </div>
           </div>
 
           <!-- Finale + 3ème place, centrés sur la SF -->
-          <div class="b-round">
+          <div class="b-round b-round--finals">
             <div class="b-round-title">Finale</div>
-            <div class="b-pair b-pair--solo" style="margin-top:9rem">
-              ${v(a.finals[0],"Vainqueurs SF")}
+            <div class="b-pair b-pair--solo b-pair--final">
+              ${m(a.finals[0],"Vainqueurs SF")}
             </div>
-            <div class="b-label-3rd" style="margin-top:1.5rem">3ème place</div>
-            <div class="b-pair b-pair--solo" style="margin-top:0.5rem">
-              ${v(a.finals[1],"Perdants SF")}
+            <div class="b-label-3rd">3ème place</div>
+            <div class="b-pair b-pair--solo b-pair--third">
+              ${m(a.finals[1],"Perdants SF")}
             </div>
           </div>
 
           <!-- Champion -->
-          <div class="b-round">
-            <div class="b-round-title" style="margin-top:10rem">Champion</div>
+          <div class="b-round b-round--champion">
+            <div class="b-round-title">Champion</div>
             <div class="trophy-box">
               <div class="trophy-icon">🏆</div>
               <div class="trophy-name">GO OUEST 2026</div>
@@ -149,4 +149,4 @@
     <div class="section-card" style="margin-top:1.25rem">
       <div class="section-title" style="margin-bottom:1rem">Qualifiés provisoires</div>
       <div class="qual-grid">${y}</div>
-    </div>`,e.dataset.scoreBound!=="true"&&(e.addEventListener("input",u=>{const f=u.target;if(!f.dataset.mid)return;const m=L(f.value);f.value!==m&&(f.value=m),b(f.dataset.mid,f.dataset.side,m,{notify:!1})}),e.addEventListener("change",u=>{const f=u.target;if(!f.dataset.mid)return;const m=L(f.value);f.value!==m&&(f.value=m),b(f.dataset.mid,f.dataset.side,m)}),e.addEventListener("focusout",u=>{const f=u.target;if(!f.dataset.mid)return;const m=L(f.value);f.value!==m&&(f.value=m),b(f.dataset.mid,f.dataset.side,m)}),e.dataset.scoreBound="true")}const Q={poules:()=>q(document.getElementById("poules")),planning:()=>ee(document.getElementById("planning")),finale:()=>se(document.getElementById("finale"))};let R="poules";function ae(e){document.querySelectorAll(".tab-content").forEach(s=>s.classList.remove("active")),document.querySelectorAll(".tab-btn").forEach(s=>s.classList.remove("active")),document.getElementById(e).classList.add("active"),document.querySelector(`[data-tab="${e}"]`).classList.add("active"),R=e,Q[e]()}document.querySelectorAll(".tab-btn").forEach(e=>{e.addEventListener("click",()=>ae(e.dataset.tab))});j(()=>Q[R]());Q.poules();
+    </div>`,e.dataset.scoreBound!=="true"&&(e.addEventListener("input",u=>{const f=u.target;if(!f.dataset.mid)return;const v=L(f.value);f.value!==v&&(f.value=v),b(f.dataset.mid,f.dataset.side,v,{notify:!1})}),e.addEventListener("change",u=>{const f=u.target;if(!f.dataset.mid)return;const v=L(f.value);f.value!==v&&(f.value=v),b(f.dataset.mid,f.dataset.side,v)}),e.addEventListener("focusout",u=>{const f=u.target;if(!f.dataset.mid)return;const v=L(f.value);f.value!==v&&(f.value=v),b(f.dataset.mid,f.dataset.side,v)}),e.dataset.scoreBound="true")}const Q={poules:()=>q(document.getElementById("poules")),planning:()=>ee(document.getElementById("planning")),finale:()=>se(document.getElementById("finale"))};let R="poules";function ae(e){document.querySelectorAll(".tab-content").forEach(s=>s.classList.remove("active")),document.querySelectorAll(".tab-btn").forEach(s=>s.classList.remove("active")),document.getElementById(e).classList.add("active"),document.querySelector(`[data-tab="${e}"]`).classList.add("active"),R=e,Q[e]()}document.querySelectorAll(".tab-btn").forEach(e=>{e.addEventListener("click",()=>ae(e.dataset.tab))});j(()=>Q[R]());Q.poules();

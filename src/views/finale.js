@@ -65,7 +65,7 @@ export function renderFinale(container) {
         <div class="bracket">
 
           <!-- Quarts de finale : 2 paires de 2 matchs -->
-          <div class="b-round">
+          <div class="b-round b-round--quarters">
             <div class="b-round-title">Quarts de finale</div>
             <div class="b-pair">
               ${bMatch(rounds.quarterfinals[0], `${q0?.pool ?? '—'} vs ${q7?.pool ?? '—'}`)}
@@ -79,29 +79,29 @@ export function renderFinale(container) {
           </div>
 
           <!-- Demi-finales : 1 paire de 2 matchs, alignée avec les QF -->
-          <div class="b-round">
+          <div class="b-round b-round--semis">
             <div class="b-round-title">Demi-finales</div>
-            <div class="b-pair b-pair--sf" style="margin-top:3rem">
+            <div class="b-pair b-pair--sf">
               ${bMatch(rounds.semifinals[0], 'Vainqueurs QF1/QF2')}
               ${bMatch(rounds.semifinals[1], 'Vainqueurs QF3/QF4')}
             </div>
           </div>
 
           <!-- Finale + 3ème place, centrés sur la SF -->
-          <div class="b-round">
+          <div class="b-round b-round--finals">
             <div class="b-round-title">Finale</div>
-            <div class="b-pair b-pair--solo" style="margin-top:9rem">
+            <div class="b-pair b-pair--solo b-pair--final">
               ${bMatch(rounds.finals[0], 'Vainqueurs SF')}
             </div>
-            <div class="b-label-3rd" style="margin-top:1.5rem">3ème place</div>
-            <div class="b-pair b-pair--solo" style="margin-top:0.5rem">
+            <div class="b-label-3rd">3ème place</div>
+            <div class="b-pair b-pair--solo b-pair--third">
               ${bMatch(rounds.finals[1], 'Perdants SF')}
             </div>
           </div>
 
           <!-- Champion -->
-          <div class="b-round">
-            <div class="b-round-title" style="margin-top:10rem">Champion</div>
+          <div class="b-round b-round--champion">
+            <div class="b-round-title">Champion</div>
             <div class="trophy-box">
               <div class="trophy-icon">🏆</div>
               <div class="trophy-name">GO OUEST 2026</div>

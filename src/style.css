@@ -176,8 +176,11 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
 .bracket-wrap {
   --b-match-height: 152px;
   --b-pair-gap: 0.75rem;
-  --b-sf-gap: 7rem;
+  --b-group-gap: 1rem;
+  --b-sf-gap: 180px;
   --b-connector: 1.25rem;
+  --b-semi-offset: 6px;
+  --b-final-offset: 172px;
   overflow-x: auto;
   padding-bottom: 1rem;
 }
@@ -194,7 +197,10 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
   border-bottom: 2px solid var(--g1);
   padding-bottom: 0.3rem;
 }
-.b-round-spacer { height: 1rem; }
+.b-round-spacer { height: var(--b-group-gap); }
+.b-round--semis .b-pair--sf { margin-top: var(--b-semi-offset); }
+.b-round--finals .b-pair--final { margin-top: var(--b-final-offset); }
+.b-round--champion .trophy-box { margin-top: var(--b-final-offset); }
 
 /* Match wrapper — carries the connector pseudo-elements */
 .b-match-wrap { position: relative; }
@@ -261,7 +267,8 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
   background: #f7f1eb;
   color: #baa89a;
 }
-.b-label-3rd { text-align: center; font-size: 0.68rem; font-weight: 800; color: var(--g1); text-transform: uppercase; letter-spacing: 0.7px; margin-top: 0.5rem; border-bottom: 2px solid var(--g1); padding-bottom: 0.3rem; }
+.b-label-3rd { text-align: center; font-size: 0.68rem; font-weight: 800; color: var(--g1); text-transform: uppercase; letter-spacing: 0.7px; margin-top: 1.5rem; border-bottom: 2px solid var(--g1); padding-bottom: 0.3rem; }
+.b-pair--third { margin-top: 0.5rem; }
 
 /* Bracket connector lines */
 .b-pair { position: relative; display: flex; flex-direction: column; gap: var(--b-pair-gap); }
@@ -299,7 +306,11 @@ main { max-width: 1300px; margin: 0 auto; padding: 1.5rem; }
   text-align: center;
   color: #3d2200;
   min-width: 180px;
+  min-height: var(--b-match-height);
   box-shadow: 0 4px 20px rgba(255,180,0,0.35);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .trophy-icon { font-size: 2.5rem; }
 .trophy-name { font-weight: 800; font-size: 1rem; margin-top: 0.4rem; }
