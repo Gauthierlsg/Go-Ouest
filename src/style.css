@@ -409,7 +409,7 @@ main {
 /* ── Planning ────────────────────────────────────────── */
 .planning-header { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
 .section-title { font-size: 1.1rem; font-weight: 800; }
-.planning-meta { color: var(--gray); font-size: 0.85rem; }
+.planning-meta { color: #576270; font-size: 0.85rem; }
 
 .courts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
 .court-card { background: white; border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
@@ -449,10 +449,10 @@ main {
   font-size: 0.76rem;
 }
 
-.m-time { font-size: 0.78rem; font-weight: 700; color: #888; min-width: 42px; font-variant-numeric: tabular-nums; }
+.m-time { font-size: 0.78rem; font-weight: 700; color: #5f6975; min-width: 42px; font-variant-numeric: tabular-nums; }
 .m-body { flex: 1; min-width: 0; }
 .m-teams { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.vs { color: #aaa; font-weight: 400; }
+.vs { color: #6b7280; font-weight: 500; }
 .m-pool-tag { display: inline-block; font-size: 0.68rem; padding: 0.1rem 0.45rem; border-radius: 8px; color: white; margin-top: 0.1rem; font-weight: 600; }
 .m-subline {
   display: flex;
@@ -463,7 +463,7 @@ main {
 }
 .m-stage-copy {
   font-size: 0.72rem;
-  color: #8a6b54;
+  color: #74563f;
   font-weight: 700;
 }
 
