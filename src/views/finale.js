@@ -1,6 +1,10 @@
 import { allPoolMatches, computeKnockout, label } from '../tournament.js';
 import { getScore, setScore } from '../state.js';
 
+function sanitizeScore(value) {
+  return value.replace(/\D+/g, '').slice(0, 2);
+}
+
 const teamTag = (team) => {
   if (!team?.team) return '<span class="b-team-meta">À déterminer</span>';
   return `<span class="m-pool-tag" style="background:${team.color ?? '#888'}">${team.pool ?? 'Phase finale'}${team.isWild ? ' ⭐' : ''}</span>`;
@@ -16,7 +20,7 @@ const bTeam = (team, matchId, side, isDisabled) => {
         <span>${label(team.team)}</span>
       </div>
       <div class="b-score">
-        <input class="b-score-input" type="number" min="0" max="99"
+        <input class="b-score-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
           value="${sc[side] ?? ''}" placeholder="—"
           data-mid="${matchId}" data-side="${side}" ${isDisabled ? 'disabled' : ''}>
       </div>
@@ -119,7 +123,25 @@ export function renderFinale(container) {
   container.addEventListener('input', e => {
     const inp = e.target;
     if (!inp.dataset.mid) return;
-    setScore(inp.dataset.mid, inp.dataset.side, inp.value);
+    const value = sanitizeScore(inp.value);
+    if (inp.value !== value) inp.value = value;
+    setScore(inp.dataset.mid, inp.dataset.side, value, { notify: false });
+  });
+
+  container.addEventListener('change', e => {
+    const inp = e.target;
+    if (!inp.dataset.mid) return;
+    const value = sanitizeScore(inp.value);
+    if (inp.value !== value) inp.value = value;
+    setScore(inp.dataset.mid, inp.dataset.side, value);
+  });
+
+  container.addEventListener('focusout', e => {
+    const inp = e.target;
+    if (!inp.dataset.mid) return;
+    const value = sanitizeScore(inp.value);
+    if (inp.value !== value) inp.value = value;
+    setScore(inp.dataset.mid, inp.dataset.side, value);
   });
   container.dataset.scoreBound = 'true';
 }

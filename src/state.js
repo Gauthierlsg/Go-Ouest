@@ -7,10 +7,11 @@ export function getState() {
   return _state;
 }
 
-export function setScore(matchId, side, value) {
+export function setScore(matchId, side, value, options = {}) {
+  const { notify = true } = options;
   if (!_state.scores[matchId]) _state.scores[matchId] = {};
   _state.scores[matchId][side] = value === '' ? null : Number(value);
-  _persist();
+  _persist(notify);
 }
 
 export function getScore(matchId) {
@@ -47,7 +48,7 @@ function normalizeState(raw) {
   }
 }
 
-function _persist() {
+function _persist(notify = true) {
   localStorage.setItem(KEY, JSON.stringify(_state));
-  _listeners.forEach(fn => fn(_state));
+  if (notify) _listeners.forEach(fn => fn(_state));
 }

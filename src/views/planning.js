@@ -2,6 +2,10 @@ import { SLOT_MIN, START_HOUR } from '../data.js';
 import { allPoolMatches, buildSchedule, label } from '../tournament.js';
 import { getScore, setScore } from '../state.js';
 
+function sanitizeScore(value) {
+  return value.replace(/\D+/g, '').slice(0, 2);
+}
+
 function fmtTime(slotIdx) {
   const total = START_HOUR * 60 + slotIdx * SLOT_MIN;
   const h = Math.floor(total / 60), m = total % 60;
@@ -25,11 +29,11 @@ export function renderPlanning(container) {
           <span class="m-pool-tag" style="background:${m.color}">${m.pool}</span>
         </div>
         <div class="m-score">
-          <input class="sc-input" type="number" min="0" max="99"
+          <input class="sc-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
             value="${sc.s1 ?? ''}" placeholder="—"
             data-mid="${m.id}" data-side="s1">
           <span class="sc-sep">:</span>
-          <input class="sc-input" type="number" min="0" max="99"
+          <input class="sc-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
             value="${sc.s2 ?? ''}" placeholder="—"
             data-mid="${m.id}" data-side="s2">
         </div>
@@ -67,7 +71,25 @@ export function renderPlanning(container) {
   container.addEventListener('input', e => {
     const inp = e.target;
     if (!inp.dataset.mid) return;
-    setScore(Number(inp.dataset.mid), inp.dataset.side, inp.value);
+    const value = sanitizeScore(inp.value);
+    if (inp.value !== value) inp.value = value;
+    setScore(Number(inp.dataset.mid), inp.dataset.side, value, { notify: false });
+  });
+
+  container.addEventListener('change', e => {
+    const inp = e.target;
+    if (!inp.dataset.mid) return;
+    const value = sanitizeScore(inp.value);
+    if (inp.value !== value) inp.value = value;
+    setScore(Number(inp.dataset.mid), inp.dataset.side, value);
+  });
+
+  container.addEventListener('focusout', e => {
+    const inp = e.target;
+    if (!inp.dataset.mid) return;
+    const value = sanitizeScore(inp.value);
+    if (inp.value !== value) inp.value = value;
+    setScore(Number(inp.dataset.mid), inp.dataset.side, value);
   });
   container.dataset.scoreBound = 'true';
 }
