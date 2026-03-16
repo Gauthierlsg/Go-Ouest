@@ -237,6 +237,8 @@ function setupAdminTools() {
   const resetBtn = document.getElementById('backup-reset');
 
   mockBtn.addEventListener('click', async () => {
+    if (!ensureAdminActionAllowed()) return;
+
     const shouldGenerate = window.confirm(
       'Generer des scores aleatoires pour tout le tournoi ? Cela remplacera les scores actuels.'
     );
@@ -262,6 +264,8 @@ function setupAdminTools() {
   });
 
   resetBtn.addEventListener('click', async () => {
+    if (!ensureAdminActionAllowed()) return;
+
     const shouldReset = window.confirm('Reinitialiser tous les scores du tournoi ?');
     if (!shouldReset) return;
 
@@ -346,6 +350,12 @@ function syncUi() {
   trigger.disabled = adminBusy;
 
   renderAdminModal();
+}
+
+function ensureAdminActionAllowed() {
+  if (getAppMode().admin) return true;
+  setStatus('Connexion admin requise pour cette action.', 'error');
+  return false;
 }
 
 function buildSyncBadge(mode) {
