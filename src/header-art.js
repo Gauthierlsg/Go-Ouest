@@ -161,6 +161,10 @@ export function initHeaderArt() {
     mkPlayer('right', 'base',   SHIRT_B),
   ];
 
+  // Last hitter index per team (-1 = none)
+  let lastHitterLeft  = -1; // 0=base, 1=volley
+  let lastHitterRight = -1; // 2=volley, 3=base
+
   let rhythmTimer = 0;
   const RHYTHM_INTERVAL = 210;
 
@@ -171,17 +175,37 @@ export function initHeaderArt() {
     ball.vx =  ball.speed;
     ball.vy = (Math.random() - 0.5) * 1.1;
     ball.trail = [];
+    lastHitterLeft = lastHitterRight = -1;
+  }
+
+  // x constraints per role — volleyers stay near T, baselines near baseline
+  function xBounds(c, mid, p, role, side) {
+    if (role === 'base') {
+      return side === 'left'
+        ? { min: c.x + p * 3,          max: c.x + c.w * 0.14 }
+        : { min: c.x + c.w * 0.86,     max: c.x + c.w - p * 3 };
+    }
+    // volley: stay in service box, not too close to net (min p*12 from net each side)
+    return side === 'left'
+      ? { min: c.x + c.w * 0.26,  max: mid - p * 12 }
+      : { min: mid + p * 12,       max: c.x + c.w * 0.74 };
   }
 
   function readyPositions(c) {
     const qL = c.x + c.w * 0.095;  // left baseline
-    const vL = c.x + c.w * 0.340;  // left volley position
+    const vL = c.x + c.w * 0.340;  // left volley position (T area)
     const vR = c.x + c.w * 0.660;  // right volley position
     const qR = c.x + c.w * 0.905;  // right baseline
-    const hi = c.y + c.h * 0.28;   // upper half
-    const lo = c.y + c.h * 0.72;   // lower half
+    const hi = c.y + c.h * 0.28;
+    const lo = c.y + c.h * 0.72;
     const mid = c.y + c.h * 0.5;
     return { qL, vL, vR, qR, hi, lo, mid };
+  }
+
+  function clampTx(pl, c, mid, p) {
+    const b = xBounds(c, mid, p, pl.role, pl.side);
+    pl.tx = Math.max(b.min, Math.min(b.max, pl.tx));
+    pl.x  = Math.max(b.min, Math.min(b.max, pl.x));
   }
 
   function initPositions(c) {
@@ -205,11 +229,11 @@ export function initHeaderArt() {
     if (!W || !H) { animId = requestAnimationFrame(tick); return; }
 
     const c   = courtBounds(W, H);
-    const p   = Math.max(1.3, H / 130);   // smaller players
+    const p   = Math.max(1.3, H / 130);
     const mid = c.x + c.w / 2;
     const r   = readyPositions(c);
 
-    // ── Rhythm: occasional speed bursts ──
+    // ── Rhythm ──
     rhythmTimer++;
     if (rhythmTimer >= RHYTHM_INTERVAL) {
       rhythmTimer = 0;
@@ -225,23 +249,17 @@ export function initHeaderArt() {
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    // Gentle speed decay toward 2
     ball.speed = ball.speed * 0.9992 + 2.0 * 0.0008;
     const spd = Math.hypot(ball.vx, ball.vy);
     if (spd > 0.1) { ball.vx = (ball.vx / spd) * ball.speed; ball.vy = (ball.vy / spd) * ball.speed; }
 
-    // Bounce top/bottom
     if (ball.y < c.y)       { ball.y = c.y;       ball.vy =  Math.abs(ball.vy); }
     if (ball.y > c.y + c.h) { ball.y = c.y + c.h; ball.vy = -Math.abs(ball.vy); }
 
-    // ── Hit detection — zone-based ──
-    // Left team: [1] volleyer intercepts if ball reaches their x zone and they can reach y
-    //            [0] baseliner intercepts if volleyer can't
-    // Right team: mirror
+    // ── Hit detection ──
+    const Y_TOL = c.h * 0.38;
 
-    const Y_TOL = c.h * 0.38;  // max y gap for player to intercept
-
-    function doHit(pl, newVxSign) {
+    function doHit(pl, idx, newVxSign) {
       if (pl.hitting) return false;
       ball.vx    = newVxSign * Math.abs(ball.vx) * (0.88 + Math.random() * 0.38);
       ball.vy    = (Math.random() - 0.5) * ball.speed * 0.85;
@@ -249,76 +267,89 @@ export function initHeaderArt() {
       pl.hitting = true;
       pl.state   = 'hit';
       rhythmTimer = 0;
+      if (idx <= 1) lastHitterLeft  = idx;
+      else          lastHitterRight = idx;
       setTimeout(() => { pl.hitting = false; pl.state = 'idle'; }, 240);
       return true;
     }
 
-    // Ball going LEFT → left team tries to hit
-    if (ball.vx < 0) {
-      const v = players[1]; // L_volley
-      const b = players[0]; // L_base
-      if (ball.x <= v.x + p * 6 && Math.abs(ball.y - v.y) < Y_TOL) {
-        doHit(v, 1);
-      } else if (ball.x <= b.x + p * 6) {
-        if (Math.abs(ball.y - b.y) < Y_TOL) doHit(b, 1);
-        else resetBall(c); // missed — reset rally
-      }
+    // Alternation helper: can this player hit?
+    // Left team: if lastHitterLeft===0 only idx=1 can hit; if ===1 only idx=0; else either
+    function canHit(idx) {
+      if (idx <= 1) return lastHitterLeft  !== idx;
+      else          return lastHitterRight !== idx;
     }
 
-    // Ball going RIGHT → right team tries to hit
+    // Ball going LEFT → left team
+    if (ball.vx < 0) {
+      const v = players[1], b = players[0];
+      const vZone = ball.x <= v.x + p * 6 && Math.abs(ball.y - v.y) < Y_TOL;
+      const bZone = ball.x <= b.x + p * 6;
+      if (vZone && canHit(1))       doHit(v, 1, 1);
+      else if (bZone && canHit(0) && Math.abs(ball.y - b.y) < Y_TOL) doHit(b, 0, 1);
+      else if (bZone && !canHit(0) && vZone && Math.abs(ball.y - v.y) < Y_TOL) doHit(v, 1, 1); // forced
+      else if (ball.x < c.x - 10)  resetBall(c);
+    }
+
+    // Ball going RIGHT → right team
     if (ball.vx > 0) {
-      const v = players[2]; // R_volley
-      const b = players[3]; // R_base
-      if (ball.x >= v.x - p * 6 && Math.abs(ball.y - v.y) < Y_TOL) {
-        doHit(v, -1);
-      } else if (ball.x >= b.x - p * 6) {
-        if (Math.abs(ball.y - b.y) < Y_TOL) doHit(b, -1);
-        else resetBall(c);
-      }
+      const v = players[2], b = players[3];
+      const vZone = ball.x >= v.x - p * 6 && Math.abs(ball.y - v.y) < Y_TOL;
+      const bZone = ball.x >= b.x - p * 6;
+      if (vZone && canHit(2))       doHit(v, 2, -1);
+      else if (bZone && canHit(3) && Math.abs(ball.y - b.y) < Y_TOL) doHit(b, 3, -1);
+      else if (bZone && !canHit(3) && vZone && Math.abs(ball.y - v.y) < Y_TOL) doHit(v, 2, -1);
+      else if (ball.x > c.x + c.w + 10) resetBall(c);
     }
 
-    // ── Update player targets ──
+    // ── Player targets ──
     if (ball.vx < 0) {
-      // Ball coming to left → left players intercept, right players rest
-      const volleyerReaches = Math.abs(ball.y - players[1].y) < Y_TOL * 1.2 && ball.x > r.vL - c.w * 0.1;
-      if (volleyerReaches) {
-        players[1].tx = Math.min(mid - p * 5, Math.max(r.vL - 20, ball.x - p * 4));
+      // Determine who will intercept based on alternation
+      const vCanHit = canHit(1);
+      const vReaches = Math.abs(ball.y - players[1].y) < Y_TOL * 1.2 && ball.x > r.vL - c.w * 0.08;
+      if (vCanHit && vReaches) {
+        const bx = xBounds(c, mid, p, 'volley', 'left');
+        players[1].tx = Math.max(bx.min, Math.min(bx.max, ball.x - p * 4));
         players[1].ty = Math.max(c.y + p * 6, Math.min(c.y + c.h - p * 6, ball.y));
         players[0].tx = r.qL;
-        players[0].ty = ball.y > r.mid ? r.hi : r.lo; // cover the open side
+        players[0].ty = ball.y > r.mid ? r.hi : r.lo;
       } else {
-        players[0].tx = Math.min(r.vL - 10, Math.max(c.x + p * 5, ball.x - p * 6));
+        const bx = xBounds(c, mid, p, 'base', 'left');
+        players[0].tx = Math.max(bx.min, Math.min(bx.max, ball.x - p * 6));
         players[0].ty = Math.max(c.y + p * 6, Math.min(c.y + c.h - p * 6, ball.y));
         players[1].tx = r.vL;
         players[1].ty = ball.y > r.mid ? r.hi : r.lo;
       }
-      // Right team rests
       players[2].tx = r.vR; players[2].ty = r.hi;
       players[3].tx = r.qR; players[3].ty = r.lo;
     } else {
-      // Ball going right → right players intercept, left rest
-      const volleyerReaches = Math.abs(ball.y - players[2].y) < Y_TOL * 1.2 && ball.x < r.vR + c.w * 0.1;
-      if (volleyerReaches) {
-        players[2].tx = Math.max(mid + p * 5, Math.min(r.vR + 20, ball.x + p * 4));
+      const vCanHit = canHit(2);
+      const vReaches = Math.abs(ball.y - players[2].y) < Y_TOL * 1.2 && ball.x < r.vR + c.w * 0.08;
+      if (vCanHit && vReaches) {
+        const bx = xBounds(c, mid, p, 'volley', 'right');
+        players[2].tx = Math.max(bx.min, Math.min(bx.max, ball.x + p * 4));
         players[2].ty = Math.max(c.y + p * 6, Math.min(c.y + c.h - p * 6, ball.y));
         players[3].tx = r.qR;
         players[3].ty = ball.y > r.mid ? r.hi : r.lo;
       } else {
-        players[3].tx = Math.max(r.vR + 10, Math.min(c.x + c.w - p * 5, ball.x + p * 6));
+        const bx = xBounds(c, mid, p, 'base', 'right');
+        players[3].tx = Math.max(bx.min, Math.min(bx.max, ball.x + p * 6));
         players[3].ty = Math.max(c.y + p * 6, Math.min(c.y + c.h - p * 6, ball.y));
         players[2].tx = r.vR;
         players[2].ty = ball.y > r.mid ? r.hi : r.lo;
       }
-      // Left team rests
       players[0].tx = r.qL; players[0].ty = r.lo;
       players[1].tx = r.vL; players[1].ty = r.hi;
     }
 
-    // "Can't move backward while hitting" rule
+    // Enforce x bounds on all players
+    for (const pl of players) clampTx(pl, c, mid, p);
+
+    // Can't move backward while hitting
     for (const pl of players) {
       if (pl.hitting) {
-        if (pl.side === 'left')  pl.tx = Math.max(pl.tx, pl.x); // left team: don't go further left
-        else                     pl.tx = Math.min(pl.tx, pl.x); // right team: don't go further right
+        if (pl.side === 'left')  pl.tx = Math.max(pl.tx, pl.x);
+        else                     pl.tx = Math.min(pl.tx, pl.x);
       }
     }
 
