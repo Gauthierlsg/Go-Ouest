@@ -897,6 +897,7 @@ main {
   margin-top: 0.5rem;
 }
 .footer-admin { display: contents; }
+.footer-admin[hidden] { display: none; }
 .footer-admin-btn {
   background: white;
   border: 1px solid #ede0d4;
