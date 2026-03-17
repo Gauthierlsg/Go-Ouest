@@ -108,13 +108,27 @@ function drawPixelPlayer(ctx, cx, cy, facing, state, frame, p, shirt) {
     r(-3, -6, 2, 3, SKIN);
     r( 3, -7, 2, 2, SKIN);
     r( 4, -9, 2, 2, SKIN);
-    r( 5, -11, 1, 7, RAQUET);
-    r( 6, -10, 1, 5, STR);
+    // Racket head (frame + strings)
+    r( 5, -14, 4, 1, RAQUET);  // top
+    r( 5,  -7, 4, 1, RAQUET);  // bottom
+    r( 5, -14, 1, 8, RAQUET);  // left
+    r( 8, -14, 1, 8, RAQUET);  // right
+    r( 6, -13, 2, 6, STR);     // strings
+    // Handle
+    r( 6,  -6, 1, 4, RAQUET);
   } else {
     r(-2, -6, 2, 3, SKIN);
     r( 3, -6, 2, 3, SKIN);
-    r( 4, -9, 1, 6, RAQUET);
-    r( 5, -8, 1, 4, STR);
+    // Racket head vertical (ready position)
+    r( 4, -13, 1, 1, RAQUET);  // top
+    r( 7, -13, 1, 1, RAQUET);
+    r( 4, -13, 4, 1, RAQUET);  // top bar
+    r( 4,  -8, 4, 1, RAQUET);  // bottom bar
+    r( 4, -13, 1, 6, RAQUET);  // left
+    r( 7, -13, 1, 6, RAQUET);  // right
+    r( 5, -12, 2, 4, STR);     // strings
+    // Handle
+    r( 5,  -7, 1, 3, RAQUET);
   }
 
   ctx.restore();
@@ -165,9 +179,6 @@ export function initHeaderArt() {
   let lastHitterLeft  = -1; // 0=base, 1=volley
   let lastHitterRight = -1; // 2=volley, 3=base
 
-  let rhythmTimer = 0;
-  const RHYTHM_INTERVAL = 210;
-
   function resetBall(c) {
     ball.speed = 0.9 + Math.random() * 0.4;
     ball.x  = c.x + c.w * 0.38;
@@ -178,17 +189,28 @@ export function initHeaderArt() {
     lastHitterLeft = lastHitterRight = -1;
   }
 
-  // x constraints per role — volleyers stay near T, baselines near baseline
+  // x/y constraints per role
+  // volleyers = strictly inside their service box (sbL→mid, slT→slB)
+  // baselines = near their baseline
   function xBounds(c, mid, p, role, side) {
+    const sbL = c.x + c.w * 0.229;
+    const sbR = c.x + c.w * 0.771;
     if (role === 'base') {
       return side === 'left'
-        ? { min: c.x + p * 3,          max: c.x + c.w * 0.14 }
-        : { min: c.x + c.w * 0.86,     max: c.x + c.w - p * 3 };
+        ? { min: c.x + p * 3,      max: c.x + c.w * 0.14 }
+        : { min: c.x + c.w * 0.86, max: c.x + c.w - p * 3 };
     }
-    // volley: stay in service box, not too close to net (min p*12 from net each side)
+    // volley: service box x, leave a few px margin from net
     return side === 'left'
-      ? { min: c.x + c.w * 0.26,  max: mid - p * 12 }
-      : { min: mid + p * 12,       max: c.x + c.w * 0.74 };
+      ? { min: sbL + p * 2, max: mid - p * 6 }
+      : { min: mid + p * 6, max: sbR - p * 2 };
+  }
+
+  function yBounds(c, role) {
+    const slT = c.y + c.h * 0.142;
+    const slB = c.y + c.h * 0.858;
+    if (role === 'volley') return { min: slT + 2, max: slB - 2 };
+    return { min: c.y + 2, max: c.y + c.h - 2 };
   }
 
   function readyPositions(c) {
@@ -202,10 +224,13 @@ export function initHeaderArt() {
     return { qL, vL, vR, qR, hi, lo, mid };
   }
 
-  function clampTx(pl, c, mid, p) {
-    const b = xBounds(c, mid, p, pl.role, pl.side);
-    pl.tx = Math.max(b.min, Math.min(b.max, pl.tx));
-    pl.x  = Math.max(b.min, Math.min(b.max, pl.x));
+  function clampPlayer(pl, c, mid, p) {
+    const bx = xBounds(c, mid, p, pl.role, pl.side);
+    const by = yBounds(c, pl.role);
+    pl.tx = Math.max(bx.min, Math.min(bx.max, pl.tx));
+    pl.ty = Math.max(by.min, Math.min(by.max, pl.ty));
+    pl.x  = Math.max(bx.min, Math.min(bx.max, pl.x));
+    pl.y  = Math.max(by.min, Math.min(by.max, pl.y));
   }
 
   function initPositions(c) {
@@ -233,18 +258,6 @@ export function initHeaderArt() {
     const mid = c.x + c.w / 2;
     const r   = readyPositions(c);
 
-    // ── Rhythm ──
-    rhythmTimer++;
-    if (rhythmTimer >= RHYTHM_INTERVAL) {
-      rhythmTimer = 0;
-      const power = Math.random() < 0.35;
-      const dir   = ball.vx > 0 ? 1 : -1;
-      ball.speed  = power ? 1.8 + Math.random() * 0.7 : 0.7 + Math.random() * 0.5;
-      const angle = (Math.random() - 0.5) * 0.9;
-      ball.vx     = dir * ball.speed * Math.cos(angle);
-      ball.vy     = ball.speed * Math.sin(angle);
-    }
-
     // ── Move ball ──
     ball.x += ball.vx;
     ball.y += ball.vy;
@@ -266,7 +279,7 @@ export function initHeaderArt() {
       ball.speed = 0.85 + Math.random() * 1.0;
       pl.hitting = true;
       pl.state   = 'hit';
-      rhythmTimer = 0;
+
       if (idx <= 1) lastHitterLeft  = idx;
       else          lastHitterRight = idx;
       setTimeout(() => { pl.hitting = false; pl.state = 'idle'; }, 240);
@@ -342,8 +355,8 @@ export function initHeaderArt() {
       players[1].tx = r.vL; players[1].ty = r.hi;
     }
 
-    // Enforce x bounds on all players
-    for (const pl of players) clampTx(pl, c, mid, p);
+    // Enforce bounds on all players
+    for (const pl of players) clampPlayer(pl, c, mid, p);
 
     // Can't move backward while hitting
     for (const pl of players) {
