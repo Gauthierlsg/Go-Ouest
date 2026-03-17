@@ -302,7 +302,7 @@ export function initHeaderArt() {
     // ── Hit detection ──
     const Y_TOL = c.h * 0.38;
     // Miss chance increases gradually: 0% before 5 exchanges, then up to ~25%
-    const MISS_CHANCE = rallyCount < 4 ? 0 : Math.min(0.40, (rallyCount - 4) * 0.08);
+    const MISS_CHANCE = rallyCount < 4 ? 0 : Math.min(0.60, (rallyCount - 4) * 0.10);
 
     function doHit(pl, idx, newVxSign) {
       if (pl.hitting) return false;
