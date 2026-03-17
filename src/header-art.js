@@ -1,14 +1,15 @@
-// Animated tennis header — pixel-art players, court movement, variable ball rhythm
-// All drawing uses fillRect only (no arcs) for pixel art feel
+// Animated tennis header — pixel-art doubles (baseliner + volleyer each side)
+// Players can't move backward while hitting the ball
 
 const CLAY_R = 194, CLAY_G = 69, CLAY_B = 10;
 const SKIN   = '#f4c490';
 const HAIR   = '#3d2310';
-const SHIRT  = '#e8670e';   // GO OUEST orange
-const SHORTS = '#fef6ee';
-const SHOE   = '#2a1a0e';
-const RAQUET = '#f5c518';
-const STR    = 'rgba(255,255,255,0.6)';
+const SHIRT_A = '#e8670e';  // GO OUEST orange
+const SHIRT_B = '#1a4a8a';  // navy (opposing team)
+const SHORTS  = '#fef6ee';
+const SHOE    = '#2a1a0e';
+const RAQUET  = '#f5c518';
+const STR     = 'rgba(255,255,255,0.6)';
 
 function courtBounds(W, H) {
   const mx = W * 0.0833, my = H * 0.068;
@@ -57,11 +58,8 @@ function drawCourt(ctx, c) {
   ctx.restore();
 }
 
-// p = one "pixel" size in screen px
-// facing: 'right' | 'left'
-// state: 'idle' | 'run' | 'hit'
-// frame: 0 or 1 for run animation
-function drawPixelPlayer(ctx, cx, cy, facing, state, frame, p) {
+// p = 1 "pixel" in screen px — kept small for compact players
+function drawPixelPlayer(ctx, cx, cy, facing, state, frame, p, shirt) {
   ctx.save();
   ctx.translate(Math.round(cx), Math.round(cy));
   if (facing === 'left') ctx.scale(-1, 1);
@@ -72,77 +70,78 @@ function drawPixelPlayer(ctx, cx, cy, facing, state, frame, p) {
     ctx.fillRect(Math.round(x * p), Math.round(y * p), Math.round(w * p), Math.round(h * p));
   };
 
-  // ─── Head ───
-  r(-2, -13, 4, 1, HAIR);
-  r(-2, -12, 4, 4, SKIN);
-  r(-2, -12, 1, 1, HAIR);  // sideburn
-  r( 1, -12, 1, 1, HAIR);
-  r(-1, -10, 1, 1, '#1a0a00'); // left eye
-  r( 1, -10, 1, 1, '#1a0a00'); // right eye
+  // Head
+  r(-1, -10, 3, 1, HAIR);
+  r(-1, -9,  3, 3, SKIN);
+  r(-1, -9,  1, 1, HAIR);
+  r( 1, -9,  1, 1, HAIR);
+  r( 0, -8,  1, 1, '#1a0a00');  // eye
 
-  // ─── Torso ───
-  r(-2, -8, 5, 5, SHIRT);
+  // Torso
+  r(-1, -6, 4, 4, shirt);
 
-  // ─── Shorts ───
-  r(-2, -3, 5, 3, SHORTS);
+  // Shorts
+  r(-1, -2, 4, 2, SHORTS);
 
-  // ─── Legs & shoes ───
+  // Legs & shoes
   if (state === 'run') {
     if (frame === 0) {
-      // left leg forward, right leg back
-      r(-2,  0, 2, 4, SKIN);
-      r( 1,  1, 2, 3, SKIN);
-      r(-3,  4, 3, 2, SHOE); // left shoe (forward)
-      r( 1,  4, 2, 2, SHOE);
+      r(-1,  0, 2, 3, SKIN);
+      r( 1,  1, 2, 2, SKIN);
+      r(-2,  3, 3, 1, SHOE);
+      r( 1,  3, 2, 1, SHOE);
     } else {
-      r(-2,  1, 2, 3, SKIN);
-      r( 1,  0, 2, 4, SKIN);
-      r(-2,  4, 2, 2, SHOE);
-      r( 1,  4, 3, 2, SHOE); // right shoe (forward)
+      r(-1,  1, 2, 2, SKIN);
+      r( 1,  0, 2, 3, SKIN);
+      r(-1,  3, 2, 1, SHOE);
+      r( 1,  3, 3, 1, SHOE);
     }
   } else {
-    // idle / hit: slight squat
-    r(-2,  0, 2, 4, SKIN);
-    r( 1,  0, 2, 4, SKIN);
-    r(-3,  4, 3, 2, SHOE);
-    r( 1,  4, 3, 2, SHOE);
+    r(-1,  0, 2, 3, SKIN);
+    r( 1,  0, 2, 3, SKIN);
+    r(-2,  3, 3, 1, SHOE);
+    r( 1,  3, 3, 1, SHOE);
   }
 
-  // ─── Arms ───
+  // Arms & racket
   if (state === 'hit') {
-    // back-swing arm
-    r(-4, -8, 2, 4, SKIN);
-    // hitting arm raised forward
-    r( 3, -9, 2, 2, SKIN);
-    r( 4, -11, 2, 3, SKIN);
-    // Racket — extended on hit
-    r( 5, -14, 2, 9, RAQUET);
-    r( 6, -13, 1, 7, STR);
+    r(-3, -6, 2, 3, SKIN);
+    r( 3, -7, 2, 2, SKIN);
+    r( 4, -9, 2, 2, SKIN);
+    r( 5, -11, 1, 7, RAQUET);
+    r( 6, -10, 1, 5, STR);
   } else {
-    // normal ready position
-    r(-3, -8, 2, 4, SKIN);  // off-hand arm
-    r( 3, -8, 2, 4, SKIN);  // racket arm
-    // Racket — vertical ready
-    r( 4, -12, 2, 8, RAQUET);
-    r( 5, -11, 1, 6, STR);
+    r(-2, -6, 2, 3, SKIN);
+    r( 3, -6, 2, 3, SKIN);
+    r( 4, -9, 1, 6, RAQUET);
+    r( 5, -8, 1, 4, STR);
   }
 
   ctx.restore();
 }
 
-// Draw a pixel-art tennis ball at (x,y) with size p*3
 function drawPixelBall(ctx, x, y, p) {
   ctx.imageSmoothingEnabled = false;
-  const s = Math.max(2, Math.round(p * 3));
-  // Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  const s = Math.max(2, Math.round(p * 2.5));
+  ctx.fillStyle = 'rgba(0,0,0,0.22)';
   ctx.fillRect(Math.round(x - s / 2 + 1), Math.round(y - s / 2 + 2), s, s);
-  // Ball body
   ctx.fillStyle = '#c8ff40';
   ctx.fillRect(Math.round(x - s / 2), Math.round(y - s / 2), s, s);
-  // Highlight pixel
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.fillStyle = 'rgba(255,255,255,0.65)';
   ctx.fillRect(Math.round(x - s / 2), Math.round(y - s / 2), Math.ceil(s / 3), Math.ceil(s / 3));
+}
+
+// ── Player factory ──
+// role: 'base' | 'volley'
+// side: 'left' | 'right'
+function mkPlayer(side, role, shirt) {
+  return {
+    x: 0, y: 0, tx: 0, ty: 0,
+    facing: side === 'left' ? 'right' : 'left',
+    state: 'idle', frame: 0, frameTimer: 0,
+    hitting: false,
+    side, role, shirt,
+  };
 }
 
 export function initHeaderArt() {
@@ -152,36 +151,45 @@ export function initHeaderArt() {
   const ctx = canvas.getContext('2d');
   let W = 0, H = 0, animId;
 
-  // ── Ball state ──
-  const ball = { x: 0, y: 0, vx: 0, vy: 0, speed: 2.4, trail: [] };
+  const ball = { x: 0, y: 0, vx: 0, vy: 0, speed: 2.0, trail: [] };
 
-  // ── Player state ──
-  // x: current X, y: current Y, tx/ty: target position
+  // [0]=L_base  [1]=L_volley  [2]=R_volley  [3]=R_base
   const players = [
-    { x: 0, y: 0, tx: 0, ty: 0, facing: 'right', state: 'idle', frame: 0, frameTimer: 0, hitting: false },
-    { x: 0, y: 0, tx: 0, ty: 0, facing: 'left',  state: 'idle', frame: 0, frameTimer: 0, hitting: false },
+    mkPlayer('left',  'base',   SHIRT_A),
+    mkPlayer('left',  'volley', SHIRT_A),
+    mkPlayer('right', 'volley', SHIRT_B),
+    mkPlayer('right', 'base',   SHIRT_B),
   ];
 
-  // ── Rhythm timers ──
   let rhythmTimer = 0;
-  const RHYTHM_INTERVAL = 180; // frames between speed changes
+  const RHYTHM_INTERVAL = 210;
 
   function resetBall(c) {
-    ball.speed = 2.0 + Math.random() * 0.8;
-    ball.x  = c.x + c.w * 0.35;
-    ball.y  = c.y + c.h * (0.3 + Math.random() * 0.4);
+    ball.speed = 1.8 + Math.random() * 0.8;
+    ball.x  = c.x + c.w * 0.38;
+    ball.y  = c.y + c.h * (0.28 + Math.random() * 0.44);
     ball.vx =  ball.speed;
-    ball.vy = (Math.random() - 0.5) * 1.4;
+    ball.vy = (Math.random() - 0.5) * 1.1;
     ball.trail = [];
   }
 
-  function playerReady(pl, c, side) {
-    // "Ready position": near own baseline, center-Y
-    const halfW = c.w * 0.12;
-    pl.tx = side === 0
-      ? c.x + halfW
-      : c.x + c.w - halfW;
-    pl.ty = c.y + c.h * 0.5;
+  function readyPositions(c) {
+    const qL = c.x + c.w * 0.095;  // left baseline
+    const vL = c.x + c.w * 0.340;  // left volley position
+    const vR = c.x + c.w * 0.660;  // right volley position
+    const qR = c.x + c.w * 0.905;  // right baseline
+    const hi = c.y + c.h * 0.28;   // upper half
+    const lo = c.y + c.h * 0.72;   // lower half
+    const mid = c.y + c.h * 0.5;
+    return { qL, vL, vR, qR, hi, lo, mid };
+  }
+
+  function initPositions(c) {
+    const r = readyPositions(c);
+    players[0].x = players[0].tx = r.qL; players[0].y = players[0].ty = r.lo;
+    players[1].x = players[1].tx = r.vL; players[1].y = players[1].ty = r.hi;
+    players[2].x = players[2].tx = r.vR; players[2].y = players[2].ty = r.hi;
+    players[3].x = players[3].tx = r.qR; players[3].y = players[3].ty = r.lo;
   }
 
   function resize() {
@@ -190,31 +198,25 @@ export function initHeaderArt() {
     if (!W || !H) return;
     const c = courtBounds(W, H);
     resetBall(c);
-    players[0].x = c.x + c.w * 0.10; players[0].y = c.y + c.h * 0.5;
-    players[1].x = c.x + c.w * 0.90; players[1].y = c.y + c.h * 0.5;
-    playerReady(players[0], c, 0);
-    playerReady(players[1], c, 1);
+    initPositions(c);
   }
-
-  let tick_n = 0;
 
   function tick() {
     if (!W || !H) { animId = requestAnimationFrame(tick); return; }
-    tick_n++;
 
-    const c  = courtBounds(W, H);
-    const p  = Math.max(2, H / 90);  // 1 "pixel" in screen px
+    const c   = courtBounds(W, H);
+    const p   = Math.max(1.3, H / 130);   // smaller players
     const mid = c.x + c.w / 2;
+    const r   = readyPositions(c);
 
-    // ── Rhythm: randomly change ball speed ──
+    // ── Rhythm: occasional speed bursts ──
     rhythmTimer++;
     if (rhythmTimer >= RHYTHM_INTERVAL) {
       rhythmTimer = 0;
-      // 40% chance power shot, 60% normal
-      const power = Math.random() < 0.4;
+      const power = Math.random() < 0.35;
       const dir   = ball.vx > 0 ? 1 : -1;
-      ball.speed  = power ? 3.8 + Math.random() * 1.2 : 1.5 + Math.random() * 1.0;
-      const angle = (Math.random() - 0.5) * 1.0;
+      ball.speed  = power ? 3.6 + Math.random() * 1.4 : 1.4 + Math.random() * 1.0;
+      const angle = (Math.random() - 0.5) * 0.9;
       ball.vx     = dir * ball.speed * Math.cos(angle);
       ball.vy     = ball.speed * Math.sin(angle);
     }
@@ -223,65 +225,113 @@ export function initHeaderArt() {
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    // Gradual speed decay toward 2.0
-    ball.speed = ball.speed * 0.999 + 2.0 * 0.001;
-    const spd  = Math.hypot(ball.vx, ball.vy);
+    // Gentle speed decay toward 2
+    ball.speed = ball.speed * 0.9992 + 2.0 * 0.0008;
+    const spd = Math.hypot(ball.vx, ball.vy);
     if (spd > 0.1) { ball.vx = (ball.vx / spd) * ball.speed; ball.vy = (ball.vy / spd) * ball.speed; }
 
-    // Bounce top / bottom
+    // Bounce top/bottom
     if (ball.y < c.y)       { ball.y = c.y;       ball.vy =  Math.abs(ball.vy); }
     if (ball.y > c.y + c.h) { ball.y = c.y + c.h; ball.vy = -Math.abs(ball.vy); }
 
-    // Reach left player zone
-    const hitZoneL = players[0].x + p * 5;
-    const hitZoneR = players[1].x - p * 5;
+    // ── Hit detection — zone-based ──
+    // Left team: [1] volleyer intercepts if ball reaches their x zone and they can reach y
+    //            [0] baseliner intercepts if volleyer can't
+    // Right team: mirror
 
-    if (ball.vx < 0 && ball.x <= hitZoneL) {
-      ball.x  = hitZoneL;
-      ball.vx =  Math.abs(ball.vx) * (0.9 + Math.random() * 0.3);
-      ball.vy = (Math.random() - 0.5) * ball.speed * 0.8;
-      ball.speed = 1.8 + Math.random() * 1.6;
-      players[0].hitting = true;
-      players[0].state   = 'hit';
+    const Y_TOL = c.h * 0.38;  // max y gap for player to intercept
+
+    function doHit(pl, newVxSign) {
+      if (pl.hitting) return false;
+      ball.vx    = newVxSign * Math.abs(ball.vx) * (0.88 + Math.random() * 0.38);
+      ball.vy    = (Math.random() - 0.5) * ball.speed * 0.85;
+      ball.speed = 1.7 + Math.random() * 2.0;
+      pl.hitting = true;
+      pl.state   = 'hit';
       rhythmTimer = 0;
-      setTimeout(() => { players[0].hitting = false; players[0].state = 'idle'; }, 200);
+      setTimeout(() => { pl.hitting = false; pl.state = 'idle'; }, 240);
+      return true;
     }
 
-    if (ball.vx > 0 && ball.x >= hitZoneR) {
-      ball.x  = hitZoneR;
-      ball.vx = -Math.abs(ball.vx) * (0.9 + Math.random() * 0.3);
-      ball.vy = (Math.random() - 0.5) * ball.speed * 0.8;
-      ball.speed = 1.8 + Math.random() * 1.6;
-      players[1].hitting = true;
-      players[1].state   = 'hit';
-      rhythmTimer = 0;
-      setTimeout(() => { players[1].hitting = false; players[1].state = 'idle'; }, 200);
+    // Ball going LEFT → left team tries to hit
+    if (ball.vx < 0) {
+      const v = players[1]; // L_volley
+      const b = players[0]; // L_base
+      if (ball.x <= v.x + p * 6 && Math.abs(ball.y - v.y) < Y_TOL) {
+        doHit(v, 1);
+      } else if (ball.x <= b.x + p * 6) {
+        if (Math.abs(ball.y - b.y) < Y_TOL) doHit(b, 1);
+        else resetBall(c); // missed — reset rally
+      }
+    }
+
+    // Ball going RIGHT → right team tries to hit
+    if (ball.vx > 0) {
+      const v = players[2]; // R_volley
+      const b = players[3]; // R_base
+      if (ball.x >= v.x - p * 6 && Math.abs(ball.y - v.y) < Y_TOL) {
+        doHit(v, -1);
+      } else if (ball.x >= b.x - p * 6) {
+        if (Math.abs(ball.y - b.y) < Y_TOL) doHit(b, -1);
+        else resetBall(c);
+      }
     }
 
     // ── Update player targets ──
-    // Ball going left → left player moves to intercept
     if (ball.vx < 0) {
-      players[0].tx = Math.max(c.x + p * 5, Math.min(mid - p * 4, ball.x - p * 10));
-      players[0].ty = Math.max(c.y + p * 10, Math.min(c.y + c.h - p * 10, ball.y));
-      playerReady(players[1], c, 1);
+      // Ball coming to left → left players intercept, right players rest
+      const volleyerReaches = Math.abs(ball.y - players[1].y) < Y_TOL * 1.2 && ball.x > r.vL - c.w * 0.1;
+      if (volleyerReaches) {
+        players[1].tx = Math.min(mid - p * 5, Math.max(r.vL - 20, ball.x - p * 4));
+        players[1].ty = Math.max(c.y + p * 6, Math.min(c.y + c.h - p * 6, ball.y));
+        players[0].tx = r.qL;
+        players[0].ty = ball.y > r.mid ? r.hi : r.lo; // cover the open side
+      } else {
+        players[0].tx = Math.min(r.vL - 10, Math.max(c.x + p * 5, ball.x - p * 6));
+        players[0].ty = Math.max(c.y + p * 6, Math.min(c.y + c.h - p * 6, ball.y));
+        players[1].tx = r.vL;
+        players[1].ty = ball.y > r.mid ? r.hi : r.lo;
+      }
+      // Right team rests
+      players[2].tx = r.vR; players[2].ty = r.hi;
+      players[3].tx = r.qR; players[3].ty = r.lo;
     } else {
-      players[1].tx = Math.min(c.x + c.w - p * 5, Math.max(mid + p * 4, ball.x + p * 10));
-      players[1].ty = Math.max(c.y + p * 10, Math.min(c.y + c.h - p * 10, ball.y));
-      playerReady(players[0], c, 0);
+      // Ball going right → right players intercept, left rest
+      const volleyerReaches = Math.abs(ball.y - players[2].y) < Y_TOL * 1.2 && ball.x < r.vR + c.w * 0.1;
+      if (volleyerReaches) {
+        players[2].tx = Math.max(mid + p * 5, Math.min(r.vR + 20, ball.x + p * 4));
+        players[2].ty = Math.max(c.y + p * 6, Math.min(c.y + c.h - p * 6, ball.y));
+        players[3].tx = r.qR;
+        players[3].ty = ball.y > r.mid ? r.hi : r.lo;
+      } else {
+        players[3].tx = Math.max(r.vR + 10, Math.min(c.x + c.w - p * 5, ball.x + p * 6));
+        players[3].ty = Math.max(c.y + p * 6, Math.min(c.y + c.h - p * 6, ball.y));
+        players[2].tx = r.vR;
+        players[2].ty = ball.y > r.mid ? r.hi : r.lo;
+      }
+      // Left team rests
+      players[0].tx = r.qL; players[0].ty = r.lo;
+      players[1].tx = r.vL; players[1].ty = r.hi;
     }
 
-    // ── Move players toward targets ──
-    for (const [i, pl] of players.entries()) {
-      const dx = pl.tx - pl.x;
-      const dy = pl.ty - pl.y;
-      const dist = Math.hypot(dx, dy);
-      const moveSpd = Math.min(dist, 3.5);
+    // "Can't move backward while hitting" rule
+    for (const pl of players) {
+      if (pl.hitting) {
+        if (pl.side === 'left')  pl.tx = Math.max(pl.tx, pl.x); // left team: don't go further left
+        else                     pl.tx = Math.min(pl.tx, pl.x); // right team: don't go further right
+      }
+    }
 
+    // ── Move players ──
+    for (const pl of players) {
+      const dx   = pl.tx - pl.x;
+      const dy   = pl.ty - pl.y;
+      const dist = Math.hypot(dx, dy);
+      const spd2 = Math.min(dist, 3.2);
       if (dist > 1) {
-        pl.x += (dx / dist) * moveSpd;
-        pl.y += (dy / dist) * moveSpd;
+        pl.x += (dx / dist) * spd2;
+        pl.y += (dy / dist) * spd2;
         if (!pl.hitting) pl.state = 'run';
-        // Animate run frames every 8 ticks
         pl.frameTimer++;
         if (pl.frameTimer >= 8) { pl.frameTimer = 0; pl.frame = 1 - pl.frame; }
       } else {
@@ -292,28 +342,22 @@ export function initHeaderArt() {
     // ── Draw ──
     ctx.fillStyle = `rgb(${CLAY_R},${CLAY_G},${CLAY_B})`;
     ctx.fillRect(0, 0, W, H);
-
     drawCourt(ctx, c);
 
-    // Players
-    drawPixelPlayer(ctx, players[0].x, players[0].y, players[0].facing, players[0].state, players[0].frame, p);
-    drawPixelPlayer(ctx, players[1].x, players[1].y, players[1].facing, players[1].state, players[1].frame, p);
-
-    // Ball trail (short, pixel-art)
-    ball.trail.push({ x: ball.x, y: ball.y });
-    if (ball.trail.length > 5) ball.trail.shift();
-
-    for (let i = 0; i < ball.trail.length - 1; i++) {
-      const ratio = i / ball.trail.length;
-      const ts = Math.max(1, Math.round(p * 3 * ratio * 0.6));
-      ctx.fillStyle = `rgba(200,255,50,${ratio * 0.3})`;
-      ctx.fillRect(
-        Math.round(ball.trail[i].x - ts / 2),
-        Math.round(ball.trail[i].y - ts / 2),
-        ts, ts
-      );
+    // Draw all 4 players (back ones first for z-order)
+    for (const pl of [players[0], players[3], players[1], players[2]]) {
+      drawPixelPlayer(ctx, pl.x, pl.y, pl.facing, pl.state, pl.frame, p, pl.shirt);
     }
 
+    // Ball trail
+    ball.trail.push({ x: ball.x, y: ball.y });
+    if (ball.trail.length > 4) ball.trail.shift();
+    for (let i = 0; i < ball.trail.length - 1; i++) {
+      const ratio = i / ball.trail.length;
+      const ts = Math.max(1, Math.round(p * 2 * ratio * 0.5));
+      ctx.fillStyle = `rgba(200,255,50,${ratio * 0.22})`;
+      ctx.fillRect(Math.round(ball.trail[i].x - ts / 2), Math.round(ball.trail[i].y - ts / 2), ts, ts);
+    }
     drawPixelBall(ctx, ball.x, ball.y, p);
 
     animId = requestAnimationFrame(tick);
