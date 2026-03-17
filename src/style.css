@@ -774,6 +774,7 @@ main {
 @media (max-width: 740px) {
   /* Header */
   header { padding: 1.1rem 1rem 1rem; }
+  header::before { background-size: cover; }
   .header-logo { height: 110px; }
   header .sub { font-size: 0.82rem; margin-top: 0.25rem; }
   .stats-row { gap: 1.2rem; margin-top: 1rem; }
