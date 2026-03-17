@@ -1,3 +1,4 @@
+import { initHeaderArt } from './header-art.js';
 import {
   getAppMode,
   getState,
@@ -46,6 +47,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => goTab(btn.dataset.tab));
 });
 
+initHeaderArt();
 setupAdminControls();
 setupAdminTools();
 setupAdminToolbarLayout();
