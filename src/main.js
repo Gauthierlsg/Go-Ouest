@@ -402,7 +402,8 @@ function syncUi() {
   adminToolbar.setAttribute('aria-hidden', String(!mode.admin));
   adminToolbar.inert = !mode.admin;
   syncBadge.textContent = buildSyncBadge(mode);
-  trigger.textContent = mode.admin ? 'Admin connecte' : 'Connexion admin';
+  trigger.classList.toggle('admin-access-btn--active', mode.admin);
+  trigger.title = mode.admin ? 'Admin connecté' : 'Connexion admin';
   trigger.disabled = adminBusy || adminToolBusy;
   mockBtn.disabled = !mode.admin || adminToolBusy;
   resetBtn.disabled = !mode.admin || adminToolBusy;
@@ -427,23 +428,8 @@ function scheduleAdminToolbarOffsetSync() {
 }
 
 function syncAdminToolbarOffset() {
-  const toolbar = document.getElementById('admin-toolbar');
-  const rootStyle = document.documentElement.style;
-
-  if (!toolbar || toolbar.hidden) {
-    rootStyle.setProperty('--admin-toolbar-offset', '0px');
-    return;
-  }
-
-  const computed = window.getComputedStyle(toolbar);
-  if (computed.display === 'none' || computed.visibility === 'hidden') {
-    rootStyle.setProperty('--admin-toolbar-offset', '0px');
-    return;
-  }
-
-  const bottom = Number.parseFloat(computed.bottom) || 0;
-  const offset = Math.ceil(toolbar.getBoundingClientRect().height + bottom + 24);
-  rootStyle.setProperty('--admin-toolbar-offset', `${offset}px`);
+  // toolbar is now inside the footer (not fixed), no offset needed
+  document.documentElement.style.setProperty('--admin-toolbar-offset', '0px');
 }
 
 function ensureAdminActionAllowed() {
