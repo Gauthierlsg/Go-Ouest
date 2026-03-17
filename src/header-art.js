@@ -142,7 +142,7 @@ function drawPixelBall(ctx, x, y, p) {
 }
 
 function drawScore(ctx, score, c, W) {
-  const fontSize = Math.max(13, Math.round(c.h * 0.28));
+  const fontSize = Math.max(10, Math.round(c.h * 0.16));
   ctx.save();
   ctx.font = `bold ${fontSize}px monospace`;
   ctx.textBaseline = 'middle';
