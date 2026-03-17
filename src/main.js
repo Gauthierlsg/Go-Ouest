@@ -32,6 +32,9 @@ let toolbarOffsetRaf = null;
 let adminToolbarObserver = null;
 let tournamentWriteQueue = Promise.resolve();
 let confirmModalResolver = null;
+let scoreInputActivating = false;
+let scoreActivatingTimer = null;
+let deferredRenderTimer = null;
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => goTab(btn.dataset.tab));
@@ -46,9 +49,38 @@ window.addEventListener('go-ouest:sync-error', event => {
   setStatus(message, 'error');
 });
 
+// On mobile, tapping a new input fires focusout on the previous one BEFORE
+// focus settles on the new one. We track pointerdown/Tab to know a transition
+// is in progress and defer the re-render, preventing the double-tap issue
+// and broken Tab navigation on desktop.
+function markScoreInputActivating() {
+  scoreInputActivating = true;
+  clearTimeout(scoreActivatingTimer);
+  scoreActivatingTimer = setTimeout(() => { scoreInputActivating = false; }, 400);
+}
+
+document.addEventListener('pointerdown', e => {
+  if (!e.target.matches('.sc-input, .b-score-input')) return;
+  markScoreInputActivating();
+}, true);
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Tab') return;
+  if (!e.target.matches('.sc-input, .b-score-input')) return;
+  markScoreInputActivating();
+}, true);
+
 subscribe(() => {
   syncUi();
-  views[activeTab]();
+  if (isScoreInputTransitioning()) {
+    clearTimeout(deferredRenderTimer);
+    deferredRenderTimer = setTimeout(() => {
+      if (!isScoreInputTransitioning()) views[activeTab]();
+    }, 400);
+  } else {
+    clearTimeout(deferredRenderTimer);
+    views[activeTab]();
+  }
 });
 
 // Initialize Vercel Web Analytics
@@ -612,8 +644,16 @@ function runTournamentWrite(action) {
   return queued;
 }
 
-function shouldDelayRemoteRefresh() {
+function isScoreInputFocused() {
   return Boolean(document.querySelector('.sc-input:focus, .b-score-input:focus'));
+}
+
+function isScoreInputTransitioning() {
+  return scoreInputActivating || isScoreInputFocused();
+}
+
+function shouldDelayRemoteRefresh() {
+  return isScoreInputTransitioning();
 }
 
 function isLocalDev() {
