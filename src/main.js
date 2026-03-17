@@ -1,5 +1,7 @@
 import {
   getAppMode,
+  getState,
+  mergeStates,
   registerMutationHandler,
   replaceState,
   resetState,
@@ -111,7 +113,10 @@ async function boot() {
 async function connectRemote(sessionState) {
   try {
     const tournament = await apiRequest(API_TOURNAMENT);
-    replaceState(tournament.state, { persist: true, notify: false });
+    // Merge remote state with local so scores entered offline or not yet
+    // synced to Blob are not wiped on reload.
+    const merged = mergeStates(getState(), tournament.state);
+    replaceState(merged, { persist: true, notify: false });
 
     setAppMode({
       source: 'remote',

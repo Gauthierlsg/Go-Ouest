@@ -122,9 +122,9 @@ export async function commitScore(matchId, side, value) {
     }
     return _state;
   } catch (error) {
-    _state = previousState;
-    _persistLocal();
-    _notify();
+    // Keep local score even if remote sync fails — it will be re-synced on
+    // the next successful write. Reverting here causes data loss on flaky
+    // mobile connections.
     emitSyncError(error);
     throw error;
   }
@@ -235,6 +235,28 @@ function normalizeScoreValue(value) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric) || numeric < 0) return undefined;
   return numeric;
+}
+
+// Merge local and remote states, keeping the union of scores.
+// Prefers the more complete score (both sides set) when there's a conflict.
+// Used at boot time so local drafts aren't wiped by a lagging remote.
+export function mergeStates(localState, remoteState) {
+  const local = sanitizeState(localState);
+  const remote = sanitizeState(remoteState);
+  const merged = { ...remote.scores };
+
+  Object.entries(local.scores).forEach(([matchId, localScore]) => {
+    const remoteScore = remote.scores[matchId];
+    if (!remoteScore) {
+      merged[matchId] = localScore;
+      return;
+    }
+    const localComplete = localScore.s1 != null && localScore.s2 != null;
+    const remoteComplete = remoteScore.s1 != null && remoteScore.s2 != null;
+    if (localComplete && !remoteComplete) merged[matchId] = localScore;
+  });
+
+  return { scores: merged };
 }
 
 function statesEqual(a, b) {
