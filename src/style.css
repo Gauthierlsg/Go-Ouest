@@ -6,7 +6,7 @@
   --gray: #6c757d;
   --text: #1a1a1a;
   --shadow: 0 2px 12px rgba(0,0,0,0.09);
-  --admin-toolbar-offset: 0px;
+  --admin-toolbar-offset: 0px !important;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -212,42 +212,28 @@ main {
 
 .admin-toolbar {
   position: fixed;
-  left: 50%;
+  right: 1rem;
   bottom: 1rem;
-  transform: translateX(-50%);
   z-index: 160;
-  width: min(calc(100% - 2rem), 980px);
   background: rgba(255, 250, 246, 0.96);
   border: 1px solid #f1d9c7;
-  border-radius: 18px;
-  box-shadow: 0 14px 34px rgba(95, 54, 26, 0.16);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(95, 54, 26, 0.18);
   backdrop-filter: blur(12px);
-  padding: 0.95rem 1rem;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.85rem 1rem;
-  align-items: center;
+  padding: 0.65rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
 }
 .admin-toolbar[hidden] {
   display: none !important;
 }
-.admin-toolbar__title {
-  font-size: 0.86rem;
-  font-weight: 800;
-  color: var(--g1);
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-.admin-toolbar__meta {
-  color: #8a6b54;
-  font-size: 0.82rem;
-  margin-top: 0.15rem;
-}
+.admin-toolbar__copy { display: none; }
 .admin-toolbar__actions {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.65rem;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .admin-modal {
@@ -803,13 +789,8 @@ main {
     padding: 0.75rem 0.85rem;
   }
   .admin-toolbar {
-    width: calc(100% - 1rem);
-    bottom: 0.5rem;
-    padding: 0.9rem 0.85rem;
-    grid-template-columns: 1fr;
-  }
-  .admin-toolbar__actions {
-    justify-content: stretch;
+    right: 0.6rem;
+    bottom: 0.6rem;
   }
 
   /* Poules — cacher J/V/D, garder # · Duo · GA · Pts */
