@@ -169,7 +169,7 @@ export function initHeaderArt() {
   const RHYTHM_INTERVAL = 210;
 
   function resetBall(c) {
-    ball.speed = 1.8 + Math.random() * 0.8;
+    ball.speed = 0.9 + Math.random() * 0.4;
     ball.x  = c.x + c.w * 0.38;
     ball.y  = c.y + c.h * (0.28 + Math.random() * 0.44);
     ball.vx =  ball.speed;
@@ -239,7 +239,7 @@ export function initHeaderArt() {
       rhythmTimer = 0;
       const power = Math.random() < 0.35;
       const dir   = ball.vx > 0 ? 1 : -1;
-      ball.speed  = power ? 3.6 + Math.random() * 1.4 : 1.4 + Math.random() * 1.0;
+      ball.speed  = power ? 1.8 + Math.random() * 0.7 : 0.7 + Math.random() * 0.5;
       const angle = (Math.random() - 0.5) * 0.9;
       ball.vx     = dir * ball.speed * Math.cos(angle);
       ball.vy     = ball.speed * Math.sin(angle);
@@ -249,7 +249,7 @@ export function initHeaderArt() {
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    ball.speed = ball.speed * 0.9992 + 2.0 * 0.0008;
+    ball.speed = ball.speed * 0.9992 + 1.0 * 0.0008;
     const spd = Math.hypot(ball.vx, ball.vy);
     if (spd > 0.1) { ball.vx = (ball.vx / spd) * ball.speed; ball.vy = (ball.vy / spd) * ball.speed; }
 
@@ -263,7 +263,7 @@ export function initHeaderArt() {
       if (pl.hitting) return false;
       ball.vx    = newVxSign * Math.abs(ball.vx) * (0.88 + Math.random() * 0.38);
       ball.vy    = (Math.random() - 0.5) * ball.speed * 0.85;
-      ball.speed = 1.7 + Math.random() * 2.0;
+      ball.speed = 0.85 + Math.random() * 1.0;
       pl.hitting = true;
       pl.state   = 'hit';
       rhythmTimer = 0;
@@ -358,7 +358,7 @@ export function initHeaderArt() {
       const dx   = pl.tx - pl.x;
       const dy   = pl.ty - pl.y;
       const dist = Math.hypot(dx, dy);
-      const spd2 = Math.min(dist, 3.2);
+      const spd2 = Math.min(dist, 1.6);
       if (dist > 1) {
         pl.x += (dx / dist) * spd2;
         pl.y += (dy / dist) * spd2;
