@@ -13,7 +13,6 @@ import { createMockTournamentState } from './mock-data.js';
 import { renderPools } from './views/pools.js';
 import { renderPlanning } from './views/planning.js';
 import { renderFinale } from './views/finale.js';
-import { injectSpeedInsights } from '@vercel/speed-insights';
 
 // Fallback poll interval quand Realtime est actif (filet de sécurité)
 const POLL_INTERVAL_MS = 60_000;
@@ -42,7 +41,6 @@ let scoreActivatingTimer = null;
 let deferredRenderTimer = null;
 
 // Initialize Speed Insights
-injectSpeedInsights();
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => goTab(btn.dataset.tab));
