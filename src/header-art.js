@@ -209,7 +209,7 @@ export function initHeaderArt() {
   let lastHitterRight = -1;
 
   function resetBall(c) {
-    ball.baseSpeed = (W / 1000) * (2.0 + Math.random() * 0.5) * 3;
+    ball.baseSpeed = (W / 1000) * (2.4 + Math.random() * 0.5) * 3;
     ball.speed = ball.baseSpeed;
     ball.x  = c.x + c.w * 0.38;
     ball.y  = c.y + c.h * (0.28 + Math.random() * 0.44);
@@ -291,7 +291,7 @@ export function initHeaderArt() {
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    const minSpeed = (W / 1000) * 2.0 * 3;
+    const minSpeed = (W / 1000) * 2.4 * 3;
     ball.speed = ball.speed * 0.9992 + minSpeed * 0.0008;
     const spd = Math.hypot(ball.vx, ball.vy);
     if (spd > 0.1) { ball.vx = (ball.vx / spd) * ball.speed; ball.vy = (ball.vy / spd) * ball.speed; }
