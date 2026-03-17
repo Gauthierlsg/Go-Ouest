@@ -106,18 +106,18 @@ function drawPixelPlayer(ctx, cx, cy, facing, state, frame, p, shirt, hitPhase) 
   // Arms & racket
   if (state === 'hit') {
     if (hitPhase === 0) {
-      // Windup: racket pulled back/low
+      // Windup: racket pulled far back (left), low
       r(-2, -6, 2, 3, SKIN);
-      r( 3, -5, 2, 2, SKIN);
-      r( 4, -7, 2, 2, SKIN);
-      r( 4, -10, 4, 1, RAQUET);
-      r( 4,  -4, 4, 1, RAQUET);
-      r( 4, -10, 1, 7, RAQUET);
-      r( 7, -10, 1, 7, RAQUET);
-      r( 5,  -9, 2, 5, STR);
-      r( 5,  -3, 1, 3, RAQUET);
+      r(-1, -5, 2, 2, SKIN);
+      r( 0, -7, 2, 2, SKIN);
+      r(-2, -11, 4, 1, RAQUET);
+      r(-2,  -5, 4, 1, RAQUET);
+      r(-2, -11, 1, 7, RAQUET);
+      r( 1, -11, 1, 7, RAQUET);
+      r(-1, -10, 2, 5, STR);
+      r(-1,  -4, 1, 3, RAQUET);
     } else if (hitPhase === 1) {
-      // Impact: racket fully extended, arm out
+      // Impact: racket at center, arm extended
       r(-3, -6, 2, 3, SKIN);
       r( 3, -7, 2, 2, SKIN);
       r( 4, -9, 2, 2, SKIN);
@@ -128,16 +128,16 @@ function drawPixelPlayer(ctx, cx, cy, facing, state, frame, p, shirt, hitPhase) 
       r( 6, -14, 2, 6, STR);
       r( 6,  -7, 1, 4, RAQUET);
     } else {
-      // Follow-through: racket swings high
+      // Follow-through: racket swings far forward (right) and high
       r(-3, -6, 2, 3, SKIN);
-      r( 3, -8, 2, 2, SKIN);
-      r( 3, -11, 3, 3, SKIN);
-      r( 4, -16, 4, 1, RAQUET);
-      r( 4, -10, 4, 1, RAQUET);
-      r( 4, -16, 1, 7, RAQUET);
-      r( 7, -16, 1, 7, RAQUET);
-      r( 5, -15, 2, 5, STR);
-      r( 4,  -9, 1, 4, RAQUET);
+      r( 5, -8, 2, 2, SKIN);
+      r( 6, -11, 3, 3, SKIN);
+      r( 8, -16, 4, 1, RAQUET);
+      r( 8, -10, 4, 1, RAQUET);
+      r( 8, -16, 1, 7, RAQUET);
+      r(11, -16, 1, 7, RAQUET);
+      r( 9, -15, 2, 5, STR);
+      r( 9,  -9, 1, 4, RAQUET);
     }
   } else {
     r(-2, -6, 2, 3, SKIN);
