@@ -120,7 +120,7 @@ main {
   max-width: 1300px;
   margin: 0 auto;
   padding: 1.5rem;
-  padding-bottom: calc(1.5rem + var(--admin-toolbar-offset));
+  padding-bottom: calc(1.5rem + 70px + var(--admin-toolbar-offset));
 }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
@@ -778,7 +778,7 @@ main {
   /* Layout */
   main {
     padding: 0.75rem;
-    padding-bottom: calc(0.75rem + var(--admin-toolbar-offset));
+    padding-bottom: calc(0.75rem + 70px + var(--admin-toolbar-offset));
   }
   .courts-grid { grid-template-columns: 1fr; }
   .pools-grid { grid-template-columns: 1fr; }
@@ -888,12 +888,19 @@ main {
 
 /* ── Footer ──────────────────────────────────────────── */
 .site-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: center;
   gap: 0.5rem;
-  flex-wrap: wrap;
-  padding: 1.25rem 1rem 2rem;
-  margin-top: 0.5rem;
+  flex-wrap: nowrap;
+  padding: 0.6rem 1rem;
+  background: rgba(254, 246, 238, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #ede0d4;
+  z-index: 100;
 }
 .footer-link {
   display: flex;
