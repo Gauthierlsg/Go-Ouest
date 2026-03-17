@@ -200,10 +200,11 @@ export function initHeaderArt() {
         ? { min: c.x + p * 3,      max: c.x + c.w * 0.14 }
         : { min: c.x + c.w * 0.86, max: c.x + c.w - p * 3 };
     }
-    // volley: service box x, leave a few px margin from net
+    // volley: service box, keep away from net AND from logo center column (~20% each side)
+    const logoMargin = c.w * 0.20;
     return side === 'left'
-      ? { min: sbL + p * 2, max: mid - p * 6 }
-      : { min: mid + p * 6, max: sbR - p * 2 };
+      ? { min: sbL + p * 2,            max: mid - logoMargin }
+      : { min: mid + logoMargin,        max: sbR - p * 2 };
   }
 
   function yBounds(c, role) {
