@@ -209,7 +209,7 @@ export function initHeaderArt() {
   let lastHitterRight = -1;
 
   function resetBall(c) {
-    ball.baseSpeed = (W / 1000) * (1.4 + Math.random() * 0.4) * 3;
+    ball.baseSpeed = (W / 1000) * (2.0 + Math.random() * 0.5) * 3;
     ball.speed = ball.baseSpeed;
     ball.x  = c.x + c.w * 0.38;
     ball.y  = c.y + c.h * (0.28 + Math.random() * 0.44);
@@ -291,7 +291,7 @@ export function initHeaderArt() {
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    const minSpeed = (W / 1000) * 1.4 * 3;
+    const minSpeed = (W / 1000) * 2.0 * 3;
     ball.speed = ball.speed * 0.9992 + minSpeed * 0.0008;
     const spd = Math.hypot(ball.vx, ball.vy);
     if (spd > 0.1) { ball.vx = (ball.vx / spd) * ball.speed; ball.vy = (ball.vy / spd) * ball.speed; }
@@ -302,7 +302,7 @@ export function initHeaderArt() {
     // ── Hit detection ──
     const Y_TOL = c.h * 0.38;
     // Miss chance increases gradually: 0% before 5 exchanges, then up to ~25%
-    const MISS_CHANCE = rallyCount < 5 ? 0 : Math.min(0.25, (rallyCount - 5) * 0.04);
+    const MISS_CHANCE = rallyCount < 4 ? 0 : Math.min(0.40, (rallyCount - 4) * 0.08);
 
     function doHit(pl, idx, newVxSign) {
       if (pl.hitting) return false;
@@ -407,7 +407,7 @@ export function initHeaderArt() {
       const dx   = pl.tx - pl.x;
       const dy   = pl.ty - pl.y;
       const dist = Math.hypot(dx, dy);
-      const moveSpd = (W / 1000) * 1.6 * 3;
+      const moveSpd = (W / 1000) * 2.2 * 3;
       const spd2 = Math.min(dist, moveSpd);
       if (dist > 1) {
         pl.x += (dx / dist) * spd2;
