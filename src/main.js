@@ -13,7 +13,7 @@ import { renderPools } from './views/pools.js';
 import { renderPlanning } from './views/planning.js';
 import { renderFinale } from './views/finale.js';
 
-const POLL_INTERVAL_MS = 5000;
+const POLL_INTERVAL_MS = 20_000;
 const API_TOURNAMENT = '/api/tournament';
 const API_ADMIN_SESSION = '/api/admin/session';
 
