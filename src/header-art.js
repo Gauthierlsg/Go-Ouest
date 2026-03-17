@@ -66,7 +66,7 @@ function drawCourt(ctx, c) {
 function makeBall(c, i, total) {
   const side = i % 2 === 0 ? -1 : 1;
   const angle = (0.3 + Math.random() * 0.5) * (Math.random() < 0.5 ? 1 : -1);
-  const speed = 2.2 + Math.random() * 1.4;
+  const speed = 1.0 + Math.random() * 0.5;
   return {
     x: c.x + (i % 2 === 0 ? c.w * 0.15 : c.w * 0.85),
     y: c.y + c.h * (0.2 + (i / total) * 0.6),
@@ -122,7 +122,7 @@ export function initHeaderArt() {
 
       // Trail
       b.trail.push({ x: b.x, y: b.y });
-      if (b.trail.length > 38) b.trail.shift();
+      if (b.trail.length > 16) b.trail.shift();
 
       for (let i = 0; i < b.trail.length; i++) {
         const ratio = i / b.trail.length;
