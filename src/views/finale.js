@@ -1,4 +1,5 @@
 import { allPoolMatches, computeKnockout, label } from '../tournament.js';
+import { renderPodium } from './podium.js';
 import {
   commitScore,
   countInvalidDrawScores,
@@ -139,10 +140,18 @@ export function renderFinale(container) {
       </div>
     </div>
 
+    ${champion?.team ? `
+    <div class="section-card" style="margin-top:1.25rem" id="podium-section">
+    </div>` : ''}
+
     <div class="section-card" style="margin-top:1.25rem">
       <div class="section-title" style="margin-bottom:1rem">Qualifiés provisoires</div>
       <div class="qual-grid">${qualCards}</div>
     </div>`;
+
+  // Podium section
+  const podiumSection = container.querySelector('#podium-section');
+  if (podiumSection) renderPodium(podiumSection);
 
   ensureBracketLayout(container);
   scheduleBracketLayout(container);
