@@ -128,9 +128,8 @@ export function renderFinale(container) {
               <div class="b-round-title">Champion</div>
               <div class="b-round-body">
                 <div class="trophy-box" data-node-id="CHAMPION">
-                  <div class="trophy-icon">🏆</div>
-                  <div class="trophy-name">GO OUEST 2026</div>
-                  <div class="trophy-sub">${champion?.team ? label(champion.team) : 'À déterminer'}</div>
+                  <div class="trophy-icon">${champion?.team ? '🏆' : '⏳'}</div>
+                  <div class="trophy-name">${champion?.team ? label(champion.team) : 'À déterminer'}</div>
                 </div>
               </div>
             </div>
@@ -140,9 +139,7 @@ export function renderFinale(container) {
       </div>
     </div>
 
-    ${champion?.team ? `
-    <div class="section-card" style="margin-top:1.25rem" id="podium-section">
-    </div>` : ''}
+    <div class="section-card" style="margin-top:1.25rem" id="podium-section"></div>
 
     <div class="section-card" style="margin-top:1.25rem">
       <div class="section-title" style="margin-bottom:1rem">Qualifiés provisoires</div>

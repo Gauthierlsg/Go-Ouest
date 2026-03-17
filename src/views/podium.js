@@ -141,11 +141,14 @@ export function renderPodium(container) {
   const ctx     = canvas.getContext('2d');
 
   // Names row (below canvas)
-  namesEl.innerHTML = podium.map(({ rank, duo }) => `
-    <div class="podium-name podium-name--${rank}">
+  namesEl.innerHTML = podium.map(({ rank, duo }) => {
+    const known = Boolean(duo?.team);
+    return `
+    <div class="podium-name podium-name--${rank}" style="opacity:${known ? 1 : 0.35}">
       <span class="podium-medal">${['🥇','🥈','🥉'][rank - 1]}</span>
-      <span>${duo?.team ? label(duo.team) : '—'}</span>
-    </div>`).join('');
+      <span>${known ? label(duo.team) : '—'}</span>
+    </div>`;
+  }).join('');
 
   let confetti = [];
   let animId;
@@ -186,37 +189,49 @@ export function renderPodium(container) {
       const bx   = startX + i * (blockW + gap);
       const by   = blockBaseY - bh;
       const bcx  = bx + blockW / 2;
+      const known = Boolean(duo?.team);
 
       // Podium block
-      ctx.fillStyle = BLOCK[rank - 1];
+      ctx.fillStyle = known ? BLOCK[rank - 1] : '#4a3a2a';
       ctx.fillRect(Math.round(bx), Math.round(by), Math.round(blockW), Math.round(bh));
-      // Block shine
       ctx.fillStyle = 'rgba(255,255,255,0.10)';
       ctx.fillRect(Math.round(bx), Math.round(by), Math.round(blockW * 0.3), Math.round(bh));
+
       // Rank number
       ctx.save();
       ctx.font = `bold ${Math.round(p * 7)}px monospace`;
-      ctx.fillStyle = 'rgba(0,0,0,0.35)';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
       ctx.fillText(rank, Math.round(bcx), Math.round(by + bh * 0.5));
-      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillStyle = known ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)';
       ctx.fillText(rank, Math.round(bcx), Math.round(by + bh * 0.5));
       ctx.restore();
 
-      // Jump offset — each duo has a phase offset
-      const phase = [0, Math.PI * 0.6, Math.PI * 1.2][i];
-      const jump  = Math.abs(Math.sin(t + phase)) * p * -7;
-
-      // Draw M + F side by side
+      const phase  = [0, Math.PI * 0.6, Math.PI * 1.2][i];
+      const jump   = Math.abs(Math.sin(t + phase)) * p * -7;
       const spacing = p * 7;
       const playerY = by - p * 2;
-      drawMale  (ctx, bcx - spacing, playerY, p, SHIRT[rank - 1], jump);
-      drawFemale(ctx, bcx + spacing, playerY, p, SHIRT[rank - 1], jump);
 
-      // Trophy for 1st place
-      if (rank === 1) {
-        drawTrophy(ctx, bcx, by - p * 14 + jump * 0.5, p);
+      if (known) {
+        drawMale  (ctx, bcx - spacing, playerY, p, SHIRT[rank - 1], jump);
+        drawFemale(ctx, bcx + spacing, playerY, p, SHIRT[rank - 1], jump);
+        if (rank === 1) drawTrophy(ctx, bcx, by - p * 14 + jump * 0.5, p);
+      } else {
+        // Empty silhouettes — greyed out, no jump
+        ctx.save();
+        ctx.globalAlpha = 0.18;
+        drawMale  (ctx, bcx - spacing, playerY, p, '#ffffff', 0);
+        drawFemale(ctx, bcx + spacing, playerY, p, '#ffffff', 0);
+        ctx.restore();
+        // "?" label
+        ctx.save();
+        ctx.font = `bold ${Math.round(p * 5)}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        ctx.fillText('?', Math.round(bcx), Math.round(by - p));
+        ctx.restore();
       }
     });
 
