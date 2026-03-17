@@ -402,7 +402,8 @@ function syncUi() {
   adminToolbar.setAttribute('aria-hidden', String(!mode.admin));
   adminToolbar.inert = !mode.admin;
   syncBadge.textContent = buildSyncBadge(mode);
-  trigger.textContent = mode.admin ? 'Admin connecte' : 'Connexion admin';
+  trigger.classList.toggle('admin-access-btn--active', mode.admin);
+  trigger.title = mode.admin ? 'Admin connecté' : 'Connexion admin';
   trigger.disabled = adminBusy || adminToolBusy;
   mockBtn.disabled = !mode.admin || adminToolBusy;
   resetBtn.disabled = !mode.admin || adminToolBusy;

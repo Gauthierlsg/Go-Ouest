@@ -10,8 +10,10 @@
 <body>
   <header>
     <div class="admin-corner">
-      <button id="admin-access-trigger" class="admin-access-btn" type="button">Connexion admin</button>
-      <span class="sync-badge sync-badge--header" id="sync-badge">Lecture seule</span>
+      <button id="admin-access-trigger" class="admin-access-btn" type="button" aria-label="Connexion admin">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </button>
+      <span class="sync-badge sync-badge--header" id="sync-badge" hidden></span>
     </div>
     <img src="/logo.png" alt="GO OUEST 2026" class="header-logo" />
   </header>
