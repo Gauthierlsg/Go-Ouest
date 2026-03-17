@@ -36,9 +36,10 @@ function drawCourt(ctx, c) {
   ctx.moveTo(sbR, slT); ctx.lineTo(sbR, slB);
   ctx.stroke();
 
-  // Half-court center service mark (left only)
+  // Half-court center service marks (both sides, symmetric)
   ctx.beginPath();
   ctx.moveTo(sbL, midY); ctx.lineTo(c.x + c.w * 0.380, midY);
+  ctx.moveTo(sbR, midY); ctx.lineTo(c.x + c.w * 0.620, midY);
   ctx.stroke();
 
   // Side center markers (single tick)
