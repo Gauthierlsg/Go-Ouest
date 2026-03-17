@@ -41,12 +41,10 @@ function drawCourt(ctx, c) {
   ctx.moveTo(sbL, midY); ctx.lineTo(c.x + c.w * 0.380, midY);
   ctx.stroke();
 
-  // Side center markers (= sign)
+  // Side center markers (single tick)
   ctx.beginPath();
-  ctx.moveTo(c.x,       midY - 4); ctx.lineTo(c.x + 10,      midY - 4);
-  ctx.moveTo(c.x,       midY + 4); ctx.lineTo(c.x + 10,      midY + 4);
-  ctx.moveTo(c.x + c.w, midY - 4); ctx.lineTo(c.x + c.w - 10, midY - 4);
-  ctx.moveTo(c.x + c.w, midY + 4); ctx.lineTo(c.x + c.w - 10, midY + 4);
+  ctx.moveTo(c.x,       midY); ctx.lineTo(c.x + 10,       midY);
+  ctx.moveTo(c.x + c.w, midY); ctx.lineTo(c.x + c.w - 10, midY);
   ctx.stroke();
 
   // Net: two SHORT stubs at top and bottom (like original SVG), not full line
