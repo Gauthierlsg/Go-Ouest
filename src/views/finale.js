@@ -146,12 +146,12 @@ export function renderFinale(container) {
       <div class="qual-grid">${qualCards}</div>
     </div>`;
 
-  // Podium section
-  const podiumSection = container.querySelector('#podium-section');
-  if (podiumSection) renderPodium(podiumSection);
-
   ensureBracketLayout(container);
   scheduleBracketLayout(container);
+
+  // Podium après le bracket layout pour ne pas perturber les mesures
+  const podiumSection = container.querySelector('#podium-section');
+  if (podiumSection) requestAnimationFrame(() => requestAnimationFrame(() => renderPodium(podiumSection)));
 
   if (container.dataset.scoreBound === 'true') return;
 
