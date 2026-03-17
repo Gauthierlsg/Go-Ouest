@@ -141,29 +141,33 @@ function drawPixelBall(ctx, x, y, p) {
   ctx.fillRect(Math.round(x - s / 2), Math.round(y - s / 2), Math.ceil(s / 3), Math.ceil(s / 3));
 }
 
-function drawScore(ctx, score, c, W) {
+function drawScore(ctx, score, flash, c, W) {
   const fontSize = Math.max(10, Math.round(c.h * 0.16));
   ctx.save();
   ctx.font = `bold ${fontSize}px monospace`;
   ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
   const midY = c.y + c.h / 2;
 
-  // Left score — centered in the left margin (between canvas edge and court)
-  const leftTxt = String(score.left);
-  const lx = c.x / 2;
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  ctx.textAlign = 'center';
-  ctx.fillText(leftTxt, lx + 1, midY + 1);
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText(leftTxt, lx, midY);
+  // Blink: 5 on/off cycles over 50 frames → toggle every 5 frames
+  const leftVisible  = flash.left  <= 0 || Math.floor(flash.left  / 5) % 2 === 0;
+  const rightVisible = flash.right <= 0 || Math.floor(flash.right / 5) % 2 === 0;
 
-  // Right score — centered in the right margin
-  const rightTxt = String(score.right);
+  const lx = c.x / 2;
+  if (leftVisible) {
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillText(String(score.left), lx + 1, midY + 1);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(String(score.left), lx, midY);
+  }
+
   const rx = c.x + c.w + (W - c.x - c.w) / 2;
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  ctx.fillText(rightTxt, rx + 1, midY + 1);
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText(rightTxt, rx, midY);
+  if (rightVisible) {
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillText(String(score.right), rx + 1, midY + 1);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(String(score.right), rx, midY);
+  }
 
   ctx.restore();
 }
@@ -190,6 +194,7 @@ export function initHeaderArt() {
 
   const ball = { x: 0, y: 0, vx: 0, vy: 0, speed: 0, baseSpeed: 0, trail: [] };
   const score = { left: 0, right: 0 };
+  const flash = { left: 0, right: 0 }; // countdown frames for blink (>0 = flashing)
   let rallyCount = 0;
 
   // [0]=L_base  [1]=L_volley  [2]=R_volley  [3]=R_base
@@ -336,7 +341,7 @@ export function initHeaderArt() {
       const bZone = ball.x <= b.x + p * 6;
       if (vZone && canHit(1) && !decideMiss(v))       doHit(v, 1, 1);
       else if (bZone && canHit(0) && !decideMiss(b) && Math.abs(ball.y - b.y) < Y_TOL) doHit(b, 0, 1);
-      else if (ball.x < c.x - 10)  { score.right++; resetBall(c); }
+      else if (ball.x < c.x - 10)  { score.right++; flash.right = 50; resetBall(c); }
     }
 
     // Ball going RIGHT → right team
@@ -346,7 +351,7 @@ export function initHeaderArt() {
       const bZone = ball.x >= b.x - p * 6;
       if (vZone && canHit(2) && !decideMiss(v))       doHit(v, 2, -1);
       else if (bZone && canHit(3) && !decideMiss(b) && Math.abs(ball.y - b.y) < Y_TOL) doHit(b, 3, -1);
-      else if (ball.x > c.x + c.w + 10) { score.left++; resetBall(c); }
+      else if (ball.x > c.x + c.w + 10) { score.left++; flash.left = 50; resetBall(c); }
     }
 
     // ── Player targets ──
@@ -420,8 +425,10 @@ export function initHeaderArt() {
     ctx.fillRect(0, 0, W, H);
     drawCourt(ctx, c);
 
-    // Score
-    drawScore(ctx, score, c, W);
+    // Score (decrement flash counters)
+    if (flash.left  > 0) flash.left--;
+    if (flash.right > 0) flash.right--;
+    drawScore(ctx, score, flash, c, W);
 
     // Players (back first for z-order)
     for (const pl of [players[0], players[3], players[1], players[2]]) {
