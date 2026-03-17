@@ -180,12 +180,12 @@ export function initHeaderArt() {
   let lastHitterRight = -1; // 2=volley, 3=base
 
   function resetBall(c) {
-    ball.baseSpeed = (W / 1000) * (1.4 + Math.random() * 0.4);
+    ball.baseSpeed = (W / 1000) * (1.4 + Math.random() * 0.4) * 3;
     ball.speed = ball.baseSpeed;
     ball.x  = c.x + c.w * 0.38;
     ball.y  = c.y + c.h * (0.28 + Math.random() * 0.44);
     ball.vx =  ball.speed;
-    ball.vy = (Math.random() - 0.5) * (W / 1000) * 1.0;
+    ball.vy = (Math.random() - 0.5) * (W / 1000) * 1.0 * 3;
     ball.trail = [];
     lastHitterLeft = lastHitterRight = -1;
   }
@@ -264,7 +264,7 @@ export function initHeaderArt() {
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    const minSpeed = (W / 1000) * 1.4;
+    const minSpeed = (W / 1000) * 1.4 * 3;
     ball.speed = ball.speed * 0.9992 + minSpeed * 0.0008;
     const spd = Math.hypot(ball.vx, ball.vy);
     if (spd > 0.1) { ball.vx = (ball.vx / spd) * ball.speed; ball.vy = (ball.vy / spd) * ball.speed; }
@@ -279,7 +279,7 @@ export function initHeaderArt() {
       if (pl.hitting) return false;
       ball.vx    = newVxSign * Math.abs(ball.vx) * (0.88 + Math.random() * 0.38);
       ball.vy    = (Math.random() - 0.5) * ball.speed * 0.85;
-      ball.speed = (W / 1000) * (1.25 + Math.random() * 0.9);
+      ball.speed = (W / 1000) * (1.25 + Math.random() * 0.9) * 3;
       pl.hitting = true;
       pl.state   = 'hit';
 
@@ -374,7 +374,7 @@ export function initHeaderArt() {
       const dx   = pl.tx - pl.x;
       const dy   = pl.ty - pl.y;
       const dist = Math.hypot(dx, dy);
-      const moveSpd = (W / 1000) * 1.6;
+      const moveSpd = (W / 1000) * 1.6 * 3;
       const spd2 = Math.min(dist, moveSpd);
       if (dist > 1) {
         pl.x += (dx / dist) * spd2;
