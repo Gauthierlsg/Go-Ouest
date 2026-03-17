@@ -35,11 +35,11 @@
   <footer class="site-footer">
     <a class="footer-link" href="https://chat.whatsapp.com/MOCK_WHATSAPP" target="_blank" rel="noopener">
       <span class="footer-link__icon">💬</span>
-      <span class="footer-link__label">Groupe WhatsApp</span>
+      <span class="footer-link__label">WhatsApp</span>
     </a>
     <a class="footer-link" href="https://photos.google.com/MOCK_PHOTOS" target="_blank" rel="noopener">
       <span class="footer-link__icon">📸</span>
-      <span class="footer-link__label">Google Photos</span>
+      <span class="footer-link__label">Photos</span>
     </a>
     <a class="footer-link" href="https://maps.google.com/?q=MOCK_STADE" target="_blank" rel="noopener">
       <span class="footer-link__icon">📍</span>
@@ -49,18 +49,17 @@
       <span class="footer-link__icon">🍺</span>
       <span class="footer-link__label">After</span>
     </a>
+    <aside id="admin-toolbar" class="footer-admin" hidden>
+      <button id="backup-mock" class="footer-link footer-admin-btn" type="button">
+        <span class="footer-link__icon">🎲</span>
+        <span class="footer-link__label">Mock</span>
+      </button>
+      <button id="backup-reset" class="footer-link footer-admin-btn footer-admin-btn--danger" type="button">
+        <span class="footer-link__icon">🗑️</span>
+        <span class="footer-link__label">Reset</span>
+      </button>
+    </aside>
   </footer>
-
-  <aside id="admin-toolbar" class="admin-toolbar" hidden>
-    <div class="admin-toolbar__copy">
-      <div class="admin-toolbar__title">Actions admin</div>
-      <div class="admin-toolbar__meta">Tests et remise a zero pour les organisateurs</div>
-    </div>
-    <div class="admin-toolbar__actions">
-      <button id="backup-mock" class="backup-btn" type="button">Generer mock data</button>
-      <button id="backup-reset" class="backup-btn backup-btn--danger" type="button">Reinitialiser</button>
-    </div>
-  </aside>
 
   <div id="admin-modal" class="admin-modal" hidden>
     <button class="admin-modal__backdrop" type="button" data-admin-close aria-label="Fermer"></button>
