@@ -141,26 +141,29 @@ function drawPixelBall(ctx, x, y, p) {
   ctx.fillRect(Math.round(x - s / 2), Math.round(y - s / 2), Math.ceil(s / 3), Math.ceil(s / 3));
 }
 
-function drawScore(ctx, score, c) {
-  const fontSize = Math.max(11, Math.round(c.h * 0.22));
+function drawScore(ctx, score, c, W) {
+  const fontSize = Math.max(13, Math.round(c.h * 0.28));
   ctx.save();
   ctx.font = `bold ${fontSize}px monospace`;
-  ctx.textBaseline = 'top';
+  ctx.textBaseline = 'middle';
+  const midY = c.y + c.h / 2;
 
-  // Left score (orange team)
+  // Left score — centered in the left margin (between canvas edge and court)
   const leftTxt = String(score.left);
-  ctx.fillStyle = 'rgba(0,0,0,0.35)';
-  ctx.fillText(leftTxt, c.x + 6 + 1, c.y + 5 + 1);
-  ctx.fillStyle = SHIRT_A;
-  ctx.fillText(leftTxt, c.x + 6, c.y + 5);
+  const lx = c.x / 2;
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.textAlign = 'center';
+  ctx.fillText(leftTxt, lx + 1, midY + 1);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(leftTxt, lx, midY);
 
-  // Right score (blue team)
+  // Right score — centered in the right margin
   const rightTxt = String(score.right);
-  const rw = ctx.measureText(rightTxt).width;
-  ctx.fillStyle = 'rgba(0,0,0,0.35)';
-  ctx.fillText(rightTxt, c.x + c.w - rw - 6 + 1, c.y + 5 + 1);
-  ctx.fillStyle = '#4a8aff';
-  ctx.fillText(rightTxt, c.x + c.w - rw - 6, c.y + 5);
+  const rx = c.x + c.w + (W - c.x - c.w) / 2;
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fillText(rightTxt, rx + 1, midY + 1);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(rightTxt, rx, midY);
 
   ctx.restore();
 }
@@ -418,7 +421,7 @@ export function initHeaderArt() {
     drawCourt(ctx, c);
 
     // Score
-    drawScore(ctx, score, c);
+    drawScore(ctx, score, c, W);
 
     // Players (back first for z-order)
     for (const pl of [players[0], players[3], players[1], players[2]]) {
