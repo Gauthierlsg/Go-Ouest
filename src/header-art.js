@@ -59,7 +59,7 @@ function drawCourt(ctx, c) {
 }
 
 // p = 1 "pixel" in screen px — kept small for compact players
-function drawPixelPlayer(ctx, cx, cy, facing, state, frame, p, shirt) {
+function drawPixelPlayer(ctx, cx, cy, facing, state, frame, p, shirt, hitPhase) {
   ctx.save();
   ctx.translate(Math.round(cx), Math.round(cy));
   if (facing === 'left') ctx.scale(-1, 1);
@@ -105,15 +105,40 @@ function drawPixelPlayer(ctx, cx, cy, facing, state, frame, p, shirt) {
 
   // Arms & racket
   if (state === 'hit') {
-    r(-3, -6, 2, 3, SKIN);
-    r( 3, -7, 2, 2, SKIN);
-    r( 4, -9, 2, 2, SKIN);
-    r( 5, -14, 4, 1, RAQUET);
-    r( 5,  -7, 4, 1, RAQUET);
-    r( 5, -14, 1, 8, RAQUET);
-    r( 8, -14, 1, 8, RAQUET);
-    r( 6, -13, 2, 6, STR);
-    r( 6,  -6, 1, 4, RAQUET);
+    if (hitPhase === 0) {
+      // Windup: racket pulled back/low
+      r(-2, -6, 2, 3, SKIN);
+      r( 3, -5, 2, 2, SKIN);
+      r( 4, -7, 2, 2, SKIN);
+      r( 4, -10, 4, 1, RAQUET);
+      r( 4,  -4, 4, 1, RAQUET);
+      r( 4, -10, 1, 7, RAQUET);
+      r( 7, -10, 1, 7, RAQUET);
+      r( 5,  -9, 2, 5, STR);
+      r( 5,  -3, 1, 3, RAQUET);
+    } else if (hitPhase === 1) {
+      // Impact: racket fully extended, arm out
+      r(-3, -6, 2, 3, SKIN);
+      r( 3, -7, 2, 2, SKIN);
+      r( 4, -9, 2, 2, SKIN);
+      r( 5, -15, 4, 1, RAQUET);
+      r( 5,  -8, 4, 1, RAQUET);
+      r( 5, -15, 1, 8, RAQUET);
+      r( 8, -15, 1, 8, RAQUET);
+      r( 6, -14, 2, 6, STR);
+      r( 6,  -7, 1, 4, RAQUET);
+    } else {
+      // Follow-through: racket swings high
+      r(-3, -6, 2, 3, SKIN);
+      r( 3, -8, 2, 2, SKIN);
+      r( 3, -11, 3, 3, SKIN);
+      r( 4, -16, 4, 1, RAQUET);
+      r( 4, -10, 4, 1, RAQUET);
+      r( 4, -16, 1, 7, RAQUET);
+      r( 7, -16, 1, 7, RAQUET);
+      r( 5, -15, 2, 5, STR);
+      r( 4,  -9, 1, 4, RAQUET);
+    }
   } else {
     r(-2, -6, 2, 3, SKIN);
     r( 3, -6, 2, 3, SKIN);
@@ -178,7 +203,7 @@ function mkPlayer(side, role, shirt) {
     x: 0, y: 0, tx: 0, ty: 0,
     facing: side === 'left' ? 'right' : 'left',
     state: 'idle', frame: 0, frameTimer: 0,
-    hitting: false,
+    hitting: false, hitPhase: 0,
     missDecided: false,
     willMiss: false,
     side, role, shirt,
@@ -310,13 +335,15 @@ export function initHeaderArt() {
       ball.vy    = (Math.random() - 0.5) * ball.speed * 0.85;
       ball.speed = (W / 1000) * (1.25 + Math.random() * 0.9) * 3;
       pl.hitting = true;
+      pl.hitPhase = 0;
       pl.state   = 'hit';
       rallyCount++;
-      // Reset miss decisions for all players on new rally
       for (const p2 of players) { p2.missDecided = false; p2.willMiss = false; }
       if (idx <= 1) lastHitterLeft  = idx;
       else          lastHitterRight = idx;
-      setTimeout(() => { pl.hitting = false; pl.state = 'idle'; }, 240);
+      setTimeout(() => { pl.hitPhase = 1; }, 80);
+      setTimeout(() => { pl.hitPhase = 2; }, 160);
+      setTimeout(() => { pl.hitting = false; pl.hitPhase = 0; pl.state = 'idle'; }, 280);
       return true;
     }
 
@@ -432,7 +459,7 @@ export function initHeaderArt() {
 
     // Players (back first for z-order)
     for (const pl of [players[0], players[3], players[1], players[2]]) {
-      drawPixelPlayer(ctx, pl.x, pl.y, pl.facing, pl.state, pl.frame, p, pl.shirt);
+      drawPixelPlayer(ctx, pl.x, pl.y, pl.facing, pl.state, pl.frame, p, pl.shirt, pl.hitPhase);
     }
 
     // Ball trail
