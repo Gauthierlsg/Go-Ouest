@@ -351,6 +351,19 @@ function setupConfirmModal() {
   });
 
   submit.addEventListener('click', () => resolveConfirmModal(true));
+
+  // Intercept footer external links
+  document.querySelector('.site-footer').addEventListener('click', async e => {
+    const link = e.target.closest('a[data-confirm-label]');
+    if (!link) return;
+    e.preventDefault();
+    const confirmed = await openConfirmModal({
+      title: link.dataset.confirmLabel,
+      copy: link.dataset.confirmDesc,
+      submitLabel: 'Ouvrir',
+    });
+    if (confirmed) window.open(link.href, '_blank', 'noopener');
+  });
 }
 
 async function runAdminTool(work, fallbackMessage) {
