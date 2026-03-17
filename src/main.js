@@ -8,12 +8,14 @@ import {
   setAppMode,
   subscribe,
 } from './state.js';
+import { supabase } from './supabase.js';
 import { createMockTournamentState } from './mock-data.js';
 import { renderPools } from './views/pools.js';
 import { renderPlanning } from './views/planning.js';
 import { renderFinale } from './views/finale.js';
 
-const POLL_INTERVAL_MS = 20_000;
+// Fallback poll interval quand Realtime est actif (filet de sécurité)
+const POLL_INTERVAL_MS = 60_000;
 const API_TOURNAMENT = '/api/tournament';
 const API_ADMIN_SESSION = '/api/admin/session';
 
@@ -26,6 +28,7 @@ const views = {
 let activeTab = 'poules';
 let statusTimer = null;
 let pollTimer = null;
+let realtimeChannel = null;
 let adminBusy = false;
 let adminToolBusy = false;
 let remoteBootError = null;
@@ -129,11 +132,11 @@ async function connectRemote(sessionState) {
 
     registerMutationHandler(action => runTournamentWrite(action));
 
-    startPolling();
+    startSync();
     return true;
   } catch (error) {
     remoteBootError = error;
-    stopPolling();
+    stopSync();
     registerMutationHandler(null);
     return false;
   }
@@ -401,8 +404,27 @@ async function refreshRemoteState(options = {}) {
   }
 }
 
-function startPolling() {
-  stopPolling();
+function startSync() {
+  stopSync();
+
+  // Realtime Supabase : mise à jour instantanée sur tous les appareils
+  if (supabase) {
+    realtimeChannel = supabase
+      .channel('tournament')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'tournament_state', filter: 'id=eq.main' },
+        payload => {
+          if (shouldDelayRemoteRefresh()) return;
+          const merged = mergeStates(getState(), payload.new.state);
+          const { changed } = replaceState(merged, { persist: true, notify: true });
+          if (changed) setAppMode({ lastRemoteUpdate: new Date().toISOString() });
+        }
+      )
+      .subscribe();
+  }
+
+  // Fallback poll (filet de sécurité si Realtime tombe)
   pollTimer = window.setInterval(() => {
     if (document.visibilityState === 'hidden') return;
     void refreshRemoteState({ silent: true });
@@ -411,7 +433,11 @@ function startPolling() {
   document.addEventListener('visibilitychange', handleVisibilityRefresh);
 }
 
-function stopPolling() {
+function stopSync() {
+  if (realtimeChannel) {
+    supabase?.removeChannel(realtimeChannel);
+    realtimeChannel = null;
+  }
   if (pollTimer) {
     window.clearInterval(pollTimer);
     pollTimer = null;

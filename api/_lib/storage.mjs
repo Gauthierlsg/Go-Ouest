@@ -1,138 +1,75 @@
-import { BlobNotFoundError, BlobPreconditionFailedError, get, put } from '@vercel/blob';
+import { createClient } from '@supabase/supabase-js';
 
-const STATE_PATHNAME = process.env.TOURNAMENT_STATE_PATH || 'go-ouest-2026/tournament-state.json';
-const MAX_WRITE_RETRIES = 6;
-const WRITE_RETRY_DELAYS_MS = [60, 120, 200, 320, 500, 800];
+const TABLE = 'tournament_state';
+const ROW_ID = 'main';
+
+function getSupabaseAdmin() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error('SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY manquant.');
+  }
+  return createClient(url, key, { auth: { persistSession: false } });
+}
 
 export function isStorageConfigured() {
-  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  return Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
 export async function readTournamentDocument() {
   ensureStorageConfigured();
+  const supabase = getSupabaseAdmin();
 
-  try {
-    const result = await get(STATE_PATHNAME, {
-      access: 'private',
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-      useCache: false,
-    });
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select('state, updated_at')
+    .eq('id', ROW_ID)
+    .single();
 
-    if (!result || result.statusCode !== 200 || !result.stream) {
-      return {
-        state: defaultState(),
-        updatedAt: null,
-        etag: null,
-      };
-    }
+  if (error) throw new Error(`Lecture tournoi: ${error.message}`);
 
-    const text = await new Response(result.stream).text();
-    const parsed = parseDocument(text);
-
-    return {
-      state: parsed.state,
-      updatedAt: parsed.updatedAt || result.blob.uploadedAt?.toISOString?.() || null,
-      etag: result.blob.etag || null,
-    };
-  } catch (error) {
-    if (error instanceof BlobNotFoundError) {
-      return {
-        state: defaultState(),
-        updatedAt: null,
-        etag: null,
-      };
-    }
-    throw error;
-  }
+  return {
+    state: sanitizeState(data.state),
+    updatedAt: data.updated_at,
+  };
 }
 
 export async function mutateTournamentState(mutator) {
   return mutateTournamentStateWithOptions(mutator);
 }
 
-export async function mutateTournamentStateWithOptions(mutator, options = {}) {
+export async function mutateTournamentStateWithOptions(mutator, _options = {}) {
   ensureStorageConfigured();
-  const { overwriteOnConflict = false } = options;
+  const supabase = getSupabaseAdmin();
 
-  let lastError = null;
-  let lastNextState = null;
+  const { data: current, error: readError } = await supabase
+    .from(TABLE)
+    .select('state')
+    .eq('id', ROW_ID)
+    .single();
 
-  for (let attempt = 0; attempt < MAX_WRITE_RETRIES; attempt += 1) {
-    const current = await readTournamentDocument();
-    const nextState = sanitizeState(mutator(cloneState(current.state)));
-    lastNextState = nextState;
-    const updatedAt = new Date().toISOString();
+  if (readError) throw new Error(`Lecture tournoi: ${readError.message}`);
 
-    try {
-      const result = await writeTournamentDocument(nextState, {
-        expectedEtag: current.etag || undefined,
-        updatedAt,
-      });
+  const nextState = sanitizeState(mutator(cloneState(current.state)));
 
-      return {
-        state: nextState,
-        updatedAt,
-        etag: result.etag,
-      };
-    } catch (error) {
-      if (error instanceof BlobPreconditionFailedError) {
-        lastError = error;
-        await wait(WRITE_RETRY_DELAYS_MS[attempt] ?? 800);
-        continue;
-      }
-      throw error;
-    }
-  }
+  const { error: writeError } = await supabase
+    .from(TABLE)
+    .update({ state: nextState })
+    .eq('id', ROW_ID);
 
-  if (overwriteOnConflict && lastError instanceof BlobPreconditionFailedError && lastNextState) {
-    const updatedAt = new Date().toISOString();
-    const result = await writeTournamentDocument(lastNextState, { updatedAt });
-    return {
-      state: lastNextState,
-      updatedAt,
-      etag: result.etag,
-    };
-  }
+  if (writeError) throw new Error(`Écriture tournoi: ${writeError.message}`);
 
-  if (lastError instanceof BlobPreconditionFailedError) {
-    const conflictError = new Error(
-      'Une autre mise a jour du tournoi est en cours. Reessaie dans quelques secondes.'
-    );
-    conflictError.statusCode = 409;
-    throw conflictError;
-  }
-
-  throw lastError || new Error('Impossible d’enregistrer l’état du tournoi.');
+  return { state: nextState, updatedAt: new Date().toISOString() };
 }
 
 export function sanitizeImportedState(payload) {
   return normalizeImport(payload);
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function defaultState() {
   return { scores: {} };
-}
-
-function parseDocument(text) {
-  try {
-    const parsed = JSON.parse(text);
-    if (parsed?.state) {
-      return {
-        state: sanitizeState(parsed.state),
-        updatedAt: parsed.updatedAt ?? null,
-      };
-    }
-
-    return {
-      state: sanitizeState(parsed),
-      updatedAt: null,
-    };
-  } catch {
-    return {
-      state: defaultState(),
-      updatedAt: null,
-    };
-  }
 }
 
 function normalizeImport(payload) {
@@ -140,13 +77,13 @@ function normalizeImport(payload) {
     try {
       payload = JSON.parse(payload);
     } catch {
-      throw new Error('Le JSON importe est invalide.');
+      throw new Error('Le JSON importé est invalide.');
     }
   }
 
   const candidate = payload?.state ?? payload;
   if (!candidate || typeof candidate !== 'object') {
-    throw new Error('Le JSON importe ne contient pas d’état valide.');
+    throw new Error("Le JSON importé ne contient pas d'état valide.");
   }
 
   return sanitizeState(candidate);
@@ -188,27 +125,6 @@ function cloneState(value) {
 
 function ensureStorageConfigured() {
   if (!isStorageConfigured()) {
-    throw new Error('BLOB_READ_WRITE_TOKEN manquant pour la synchro du tournoi.');
+    throw new Error('SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY manquant pour la synchro du tournoi.');
   }
-}
-
-async function writeTournamentDocument(nextState, options = {}) {
-  const { expectedEtag, updatedAt = new Date().toISOString() } = options;
-  const body = JSON.stringify({ state: nextState, updatedAt }, null, 2);
-
-  return put(STATE_PATHNAME, body, {
-    access: 'private',
-    token: process.env.BLOB_READ_WRITE_TOKEN,
-    addRandomSuffix: false,
-    allowOverwrite: true,
-    contentType: 'application/json',
-    cacheControlMaxAge: 60,
-    ifMatch: expectedEtag,
-  });
-}
-
-function wait(durationMs) {
-  return new Promise(resolve => {
-    setTimeout(resolve, durationMs);
-  });
 }
