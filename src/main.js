@@ -10,7 +10,6 @@ import { createMockTournamentState } from './mock-data.js';
 import { renderPools } from './views/pools.js';
 import { renderPlanning } from './views/planning.js';
 import { renderFinale } from './views/finale.js';
-import { inject } from '@vercel/analytics';
 
 const POLL_INTERVAL_MS = 5000;
 const API_TOURNAMENT = '/api/tournament';
@@ -82,9 +81,6 @@ subscribe(() => {
     views[activeTab]();
   }
 });
-
-// Initialize Vercel Web Analytics
-inject();
 
 void init();
 
