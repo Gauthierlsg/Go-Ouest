@@ -59,7 +59,7 @@ function drawCourt(ctx, c) {
 }
 
 // p = 1 "pixel" in screen px — kept small for compact players
-function drawPixelPlayer(ctx, cx, cy, facing, state, frame, p, shirt) {
+function drawPixelPlayer(ctx, cx, cy, facing, state, frame, p, shirt, hitPhase) {
   ctx.save();
   ctx.translate(Math.round(cx), Math.round(cy));
   if (facing === 'left') ctx.scale(-1, 1);
@@ -105,29 +105,50 @@ function drawPixelPlayer(ctx, cx, cy, facing, state, frame, p, shirt) {
 
   // Arms & racket
   if (state === 'hit') {
-    r(-3, -6, 2, 3, SKIN);
-    r( 3, -7, 2, 2, SKIN);
-    r( 4, -9, 2, 2, SKIN);
-    // Racket head (frame + strings)
-    r( 5, -14, 4, 1, RAQUET);  // top
-    r( 5,  -7, 4, 1, RAQUET);  // bottom
-    r( 5, -14, 1, 8, RAQUET);  // left
-    r( 8, -14, 1, 8, RAQUET);  // right
-    r( 6, -13, 2, 6, STR);     // strings
-    // Handle
-    r( 6,  -6, 1, 4, RAQUET);
+    if (hitPhase === 0) {
+      // Windup: racket pulled far back (left), low
+      r(-2, -6, 2, 3, SKIN);
+      r(-1, -5, 2, 2, SKIN);
+      r( 0, -7, 2, 2, SKIN);
+      r(-2, -11, 4, 1, RAQUET);
+      r(-2,  -5, 4, 1, RAQUET);
+      r(-2, -11, 1, 7, RAQUET);
+      r( 1, -11, 1, 7, RAQUET);
+      r(-1, -10, 2, 5, STR);
+      r(-1,  -4, 1, 3, RAQUET);
+    } else if (hitPhase === 1) {
+      // Impact: racket at center, arm extended
+      r(-3, -6, 2, 3, SKIN);
+      r( 3, -7, 2, 2, SKIN);
+      r( 4, -9, 2, 2, SKIN);
+      r( 5, -15, 4, 1, RAQUET);
+      r( 5,  -8, 4, 1, RAQUET);
+      r( 5, -15, 1, 8, RAQUET);
+      r( 8, -15, 1, 8, RAQUET);
+      r( 6, -14, 2, 6, STR);
+      r( 6,  -7, 1, 4, RAQUET);
+    } else {
+      // Follow-through: racket swings far forward (right) and high
+      r(-3, -6, 2, 3, SKIN);
+      r( 5, -8, 2, 2, SKIN);
+      r( 6, -11, 3, 3, SKIN);
+      r( 8, -16, 4, 1, RAQUET);
+      r( 8, -10, 4, 1, RAQUET);
+      r( 8, -16, 1, 7, RAQUET);
+      r(11, -16, 1, 7, RAQUET);
+      r( 9, -15, 2, 5, STR);
+      r( 9,  -9, 1, 4, RAQUET);
+    }
   } else {
     r(-2, -6, 2, 3, SKIN);
     r( 3, -6, 2, 3, SKIN);
-    // Racket head vertical (ready position)
-    r( 4, -13, 1, 1, RAQUET);  // top
+    r( 4, -13, 1, 1, RAQUET);
     r( 7, -13, 1, 1, RAQUET);
-    r( 4, -13, 4, 1, RAQUET);  // top bar
-    r( 4,  -8, 4, 1, RAQUET);  // bottom bar
-    r( 4, -13, 1, 6, RAQUET);  // left
-    r( 7, -13, 1, 6, RAQUET);  // right
-    r( 5, -12, 2, 4, STR);     // strings
-    // Handle
+    r( 4, -13, 4, 1, RAQUET);
+    r( 4,  -8, 4, 1, RAQUET);
+    r( 4, -13, 1, 6, RAQUET);
+    r( 7, -13, 1, 6, RAQUET);
+    r( 5, -12, 2, 4, STR);
     r( 5,  -7, 1, 3, RAQUET);
   }
 
@@ -145,15 +166,46 @@ function drawPixelBall(ctx, x, y, p) {
   ctx.fillRect(Math.round(x - s / 2), Math.round(y - s / 2), Math.ceil(s / 3), Math.ceil(s / 3));
 }
 
+function drawScore(ctx, score, flash, c, W) {
+  const fontSize = Math.max(10, Math.round(c.h * 0.16));
+  ctx.save();
+  ctx.font = `bold ${fontSize}px monospace`;
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  const midY = c.y + c.h / 2;
+
+  // Blink: 5 on/off cycles over 50 frames → toggle every 5 frames
+  const leftVisible  = flash.left  <= 0 || Math.floor(flash.left  / 5) % 2 === 0;
+  const rightVisible = flash.right <= 0 || Math.floor(flash.right / 5) % 2 === 0;
+
+  const lx = c.x / 2;
+  if (leftVisible) {
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillText(String(score.left), lx + 1, midY + 1);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(String(score.left), lx, midY);
+  }
+
+  const rx = c.x + c.w + (W - c.x - c.w) / 2;
+  if (rightVisible) {
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillText(String(score.right), rx + 1, midY + 1);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(String(score.right), rx, midY);
+  }
+
+  ctx.restore();
+}
+
 // ── Player factory ──
-// role: 'base' | 'volley'
-// side: 'left' | 'right'
 function mkPlayer(side, role, shirt) {
   return {
     x: 0, y: 0, tx: 0, ty: 0,
     facing: side === 'left' ? 'right' : 'left',
     state: 'idle', frame: 0, frameTimer: 0,
-    hitting: false,
+    hitting: false, hitPhase: 0,
+    missDecided: false,
+    willMiss: false,
     side, role, shirt,
   };
 }
@@ -166,6 +218,9 @@ export function initHeaderArt() {
   let W = 0, H = 0, animId;
 
   const ball = { x: 0, y: 0, vx: 0, vy: 0, speed: 0, baseSpeed: 0, trail: [] };
+  const score = { left: 0, right: 0 };
+  const flash = { left: 0, right: 0 }; // countdown frames for blink (>0 = flashing)
+  let rallyCount = 0;
 
   // [0]=L_base  [1]=L_volley  [2]=R_volley  [3]=R_base
   const players = [
@@ -175,12 +230,11 @@ export function initHeaderArt() {
     mkPlayer('right', 'base',   SHIRT_B),
   ];
 
-  // Last hitter index per team (-1 = none)
-  let lastHitterLeft  = -1; // 0=base, 1=volley
-  let lastHitterRight = -1; // 2=volley, 3=base
+  let lastHitterLeft  = -1;
+  let lastHitterRight = -1;
 
   function resetBall(c) {
-    ball.baseSpeed = (W / 1000) * (1.4 + Math.random() * 0.4) * 3;
+    ball.baseSpeed = (W / 1000) * (2.4 + Math.random() * 0.5) * 3;
     ball.speed = ball.baseSpeed;
     ball.x  = c.x + c.w * 0.38;
     ball.y  = c.y + c.h * (0.28 + Math.random() * 0.44);
@@ -188,11 +242,10 @@ export function initHeaderArt() {
     ball.vy = (Math.random() - 0.5) * (W / 1000) * 1.0 * 3;
     ball.trail = [];
     lastHitterLeft = lastHitterRight = -1;
+    rallyCount = 0;
+    for (const pl of players) { pl.missDecided = false; pl.willMiss = false; }
   }
 
-  // x/y constraints per role
-  // volleyers = strictly inside their service box (sbL→mid, slT→slB)
-  // baselines = near their baseline
   function xBounds(c, mid, p, role, side) {
     const sbL = c.x + c.w * 0.229;
     const sbR = c.x + c.w * 0.771;
@@ -201,11 +254,10 @@ export function initHeaderArt() {
         ? { min: c.x + p * 3,      max: c.x + c.w * 0.14 }
         : { min: c.x + c.w * 0.86, max: c.x + c.w - p * 3 };
     }
-    // volley: service box, keep away from net AND from logo center column (~20% each side)
     const logoMargin = c.w * 0.20;
     return side === 'left'
-      ? { min: sbL + p * 2,            max: mid - logoMargin }
-      : { min: mid + logoMargin,        max: sbR - p * 2 };
+      ? { min: sbL + p * 2,     max: mid - logoMargin }
+      : { min: mid + logoMargin, max: sbR - p * 2 };
   }
 
   function yBounds(c, role) {
@@ -216,10 +268,10 @@ export function initHeaderArt() {
   }
 
   function readyPositions(c) {
-    const qL = c.x + c.w * 0.095;  // left baseline
-    const vL = c.x + c.w * 0.340;  // left volley position (T area)
-    const vR = c.x + c.w * 0.660;  // right volley position
-    const qR = c.x + c.w * 0.905;  // right baseline
+    const qL = c.x + c.w * 0.095;
+    const vL = c.x + c.w * 0.340;
+    const vR = c.x + c.w * 0.660;
+    const qR = c.x + c.w * 0.905;
     const hi = c.y + c.h * 0.28;
     const lo = c.y + c.h * 0.72;
     const mid = c.y + c.h * 0.5;
@@ -264,7 +316,7 @@ export function initHeaderArt() {
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    const minSpeed = (W / 1000) * 1.4 * 3;
+    const minSpeed = (W / 1000) * 2.4 * 3;
     ball.speed = ball.speed * 0.9992 + minSpeed * 0.0008;
     const spd = Math.hypot(ball.vx, ball.vy);
     if (spd > 0.1) { ball.vx = (ball.vx / spd) * ball.speed; ball.vy = (ball.vy / spd) * ball.speed; }
@@ -274,6 +326,8 @@ export function initHeaderArt() {
 
     // ── Hit detection ──
     const Y_TOL = c.h * 0.38;
+    // Miss chance increases gradually: 0% before 5 exchanges, then up to ~25%
+    const MISS_CHANCE = rallyCount < 4 ? 0 : Math.min(0.60, (rallyCount - 4) * 0.10);
 
     function doHit(pl, idx, newVxSign) {
       if (pl.hitting) return false;
@@ -281,16 +335,27 @@ export function initHeaderArt() {
       ball.vy    = (Math.random() - 0.5) * ball.speed * 0.85;
       ball.speed = (W / 1000) * (1.25 + Math.random() * 0.9) * 3;
       pl.hitting = true;
+      pl.hitPhase = 0;
       pl.state   = 'hit';
-
+      rallyCount++;
+      for (const p2 of players) { p2.missDecided = false; p2.willMiss = false; }
       if (idx <= 1) lastHitterLeft  = idx;
       else          lastHitterRight = idx;
-      setTimeout(() => { pl.hitting = false; pl.state = 'idle'; }, 240);
+      setTimeout(() => { pl.hitPhase = 1; }, 80);
+      setTimeout(() => { pl.hitPhase = 2; }, 160);
+      setTimeout(() => { pl.hitting = false; pl.hitPhase = 0; pl.state = 'idle'; }, 280);
       return true;
     }
 
-    // Alternation helper: can this player hit?
-    // Left team: if lastHitterLeft===0 only idx=1 can hit; if ===1 only idx=0; else either
+    // Decide miss once per approach
+    function decideMiss(pl) {
+      if (!pl.missDecided) {
+        pl.missDecided = true;
+        pl.willMiss = Math.random() < MISS_CHANCE;
+      }
+      return pl.willMiss;
+    }
+
     function canHit(idx) {
       if (idx <= 1) return lastHitterLeft  !== idx;
       else          return lastHitterRight !== idx;
@@ -301,10 +366,9 @@ export function initHeaderArt() {
       const v = players[1], b = players[0];
       const vZone = ball.x <= v.x + p * 6 && Math.abs(ball.y - v.y) < Y_TOL;
       const bZone = ball.x <= b.x + p * 6;
-      if (vZone && canHit(1))       doHit(v, 1, 1);
-      else if (bZone && canHit(0) && Math.abs(ball.y - b.y) < Y_TOL) doHit(b, 0, 1);
-      else if (bZone && !canHit(0) && vZone && Math.abs(ball.y - v.y) < Y_TOL) doHit(v, 1, 1); // forced
-      else if (ball.x < c.x - 10)  resetBall(c);
+      if (vZone && canHit(1) && !decideMiss(v))       doHit(v, 1, 1);
+      else if (bZone && canHit(0) && !decideMiss(b) && Math.abs(ball.y - b.y) < Y_TOL) doHit(b, 0, 1);
+      else if (ball.x < c.x - 10)  { score.right++; flash.right = 50; resetBall(c); }
     }
 
     // Ball going RIGHT → right team
@@ -312,15 +376,13 @@ export function initHeaderArt() {
       const v = players[2], b = players[3];
       const vZone = ball.x >= v.x - p * 6 && Math.abs(ball.y - v.y) < Y_TOL;
       const bZone = ball.x >= b.x - p * 6;
-      if (vZone && canHit(2))       doHit(v, 2, -1);
-      else if (bZone && canHit(3) && Math.abs(ball.y - b.y) < Y_TOL) doHit(b, 3, -1);
-      else if (bZone && !canHit(3) && vZone && Math.abs(ball.y - v.y) < Y_TOL) doHit(v, 2, -1);
-      else if (ball.x > c.x + c.w + 10) resetBall(c);
+      if (vZone && canHit(2) && !decideMiss(v))       doHit(v, 2, -1);
+      else if (bZone && canHit(3) && !decideMiss(b) && Math.abs(ball.y - b.y) < Y_TOL) doHit(b, 3, -1);
+      else if (ball.x > c.x + c.w + 10) { score.left++; flash.left = 50; resetBall(c); }
     }
 
     // ── Player targets ──
     if (ball.vx < 0) {
-      // Determine who will intercept based on alternation
       const vCanHit = canHit(1);
       const vReaches = Math.abs(ball.y - players[1].y) < Y_TOL * 1.2 && ball.x > r.vL - c.w * 0.08;
       if (vCanHit && vReaches) {
@@ -358,10 +420,8 @@ export function initHeaderArt() {
       players[1].tx = r.vL; players[1].ty = r.hi;
     }
 
-    // Enforce bounds on all players
     for (const pl of players) clampPlayer(pl, c, mid, p);
 
-    // Can't move backward while hitting
     for (const pl of players) {
       if (pl.hitting) {
         if (pl.side === 'left')  pl.tx = Math.max(pl.tx, pl.x);
@@ -374,7 +434,7 @@ export function initHeaderArt() {
       const dx   = pl.tx - pl.x;
       const dy   = pl.ty - pl.y;
       const dist = Math.hypot(dx, dy);
-      const moveSpd = (W / 1000) * 1.6 * 3;
+      const moveSpd = (W / 1000) * 2.2 * 3;
       const spd2 = Math.min(dist, moveSpd);
       if (dist > 1) {
         pl.x += (dx / dist) * spd2;
@@ -392,9 +452,14 @@ export function initHeaderArt() {
     ctx.fillRect(0, 0, W, H);
     drawCourt(ctx, c);
 
-    // Draw all 4 players (back ones first for z-order)
+    // Score (decrement flash counters)
+    if (flash.left  > 0) flash.left--;
+    if (flash.right > 0) flash.right--;
+    drawScore(ctx, score, flash, c, W);
+
+    // Players (back first for z-order)
     for (const pl of [players[0], players[3], players[1], players[2]]) {
-      drawPixelPlayer(ctx, pl.x, pl.y, pl.facing, pl.state, pl.frame, p, pl.shirt);
+      drawPixelPlayer(ctx, pl.x, pl.y, pl.facing, pl.state, pl.frame, p, pl.shirt, pl.hitPhase);
     }
 
     // Ball trail
