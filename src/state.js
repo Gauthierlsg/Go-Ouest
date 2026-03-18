@@ -70,10 +70,6 @@ export function isReadOnlyMode() {
   return _appMode.readOnly;
 }
 
-export function isAdminMode() {
-  return _appMode.admin;
-}
-
 export function setAppMode(nextMode, options = {}) {
   const { forceNotify = false } = options;
   const merged = { ..._appMode, ...nextMode };
@@ -136,10 +132,6 @@ export function subscribe(fn) {
     const idx = _listeners.indexOf(fn);
     if (idx >= 0) _listeners.splice(idx, 1);
   };
-}
-
-export function normalizeImportedState(payload) {
-  return normalizeImport(payload);
 }
 
 function loadState() {

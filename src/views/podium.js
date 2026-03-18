@@ -111,8 +111,20 @@ function mkConfetti(W) {
   }));
 }
 
+// ─── Cleanup tracking ────────────────────────────────────────────────────
+const cleanupMap = new WeakMap();
+
+function cleanupPrevious(container) {
+  const prev = cleanupMap.get(container);
+  if (prev) {
+    prev();
+    cleanupMap.delete(container);
+  }
+}
+
 // ─── Main render ───────────────────────────────────────────────────────────
 export function renderPodium(container) {
+  cleanupPrevious(container);
   const matches = allPoolMatches();
   const { rounds } = computeKnockout(matches);
 
@@ -253,6 +265,10 @@ export function renderPodium(container) {
     tick();
   }));
 
+  // Store cleanup for this container
+  const cleanup = () => { cancelAnimationFrame(animId); ro.disconnect(); };
+  cleanupMap.set(container, cleanup);
+
   // Return cleanup
-  return () => { cancelAnimationFrame(animId); ro.disconnect(); };
+  return cleanup;
 }

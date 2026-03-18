@@ -5,7 +5,7 @@ const EVENT_DATE = new Date('2026-04-25T10:00:00');
 
 export function initCountdown() {
   const section = document.getElementById('countdown-banner');
-  if (!section) return;
+  if (!section) return null;
 
   const daysEl    = section.querySelector('[data-cd="days"]');
   const hoursEl   = section.querySelector('[data-cd="hours"]');
@@ -17,12 +17,15 @@ export function initCountdown() {
     return String(n).padStart(2, '0');
   }
 
+  let intervalId = null;
+
   function tick() {
     const now  = Date.now();
     const diff = EVENT_DATE.getTime() - now;
 
-    // Tournoi commencé → on retire la bannière
+    // Tournoi commencé → on retire la bannière et arrête l'intervalle
     if (diff <= 0) {
+      cleanup();
       section.remove();
       return;
     }
@@ -44,6 +47,15 @@ export function initCountdown() {
     }
   }
 
+  function cleanup() {
+    if (intervalId !== null) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  }
+
   tick();
-  setInterval(tick, 1000);
+  intervalId = setInterval(tick, 1000);
+
+  return cleanup;
 }
