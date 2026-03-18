@@ -960,3 +960,68 @@ main {
 .footer-link:hover { background: #fff5eb; border-color: var(--g2); }
 .footer-link__icon { font-size: 1.4rem; }
 .footer-link__label { text-align: center; }
+
+/* ── Countdown banner ─────────────────────────────────── */
+.cd-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem 0.85rem;
+  background: linear-gradient(135deg, #c04a00 0%, #e07020 100%);
+  color: #fff;
+  text-align: center;
+}
+
+.cd-units {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cd-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0,0,0,0.18);
+  border-radius: 10px;
+  padding: 0.45rem 0.75rem 0.3rem;
+  min-width: 3.2rem;
+}
+
+.cd-value {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.cd-sub {
+  font-size: 0.62rem;
+  font-weight: 600;
+  opacity: 0.75;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.15rem;
+}
+
+.cd-sep {
+  font-size: 1.7rem;
+  font-weight: 800;
+  opacity: 0.5;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.cd-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  opacity: 0.88;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 400px) {
+  .cd-value { font-size: 1.5rem; }
+  .cd-unit { min-width: 2.6rem; padding: 0.35rem 0.55rem 0.25rem; }
+}

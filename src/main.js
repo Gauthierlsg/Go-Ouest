@@ -1,4 +1,5 @@
 import { initHeaderArt } from './header-art.js';
+import { initCountdown } from './countdown.js';
 import {
   getAppMode,
   getState,
@@ -48,6 +49,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 initHeaderArt();
+initCountdown();
 setupAdminControls();
 setupAdminTools();
 setupAdminToolbarLayout();
