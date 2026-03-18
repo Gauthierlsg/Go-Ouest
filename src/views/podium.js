@@ -151,6 +151,7 @@ export function renderPodium(container) {
     </div>`;
   }).join('');
 
+  const podiumComplete = Boolean(first?.team && second?.team && third?.team);
   let confetti = [];
   let animId;
   let t = 0;
@@ -158,7 +159,7 @@ export function renderPodium(container) {
   function resize() {
     canvas.width  = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
-    confetti = mkConfetti(canvas.width);
+    if (podiumComplete) confetti = mkConfetti(canvas.width);
   }
 
   function tick() {
@@ -229,7 +230,7 @@ export function renderPodium(container) {
       }
     });
 
-    // Confetti
+    // Confetti (only when podium is complete)
     for (const c of confetti) {
       c.x += c.vx; c.y += c.vy; c.rot += c.vrot;
       if (c.y > H + 20) { c.y = -20; c.x = Math.random() * W; }
