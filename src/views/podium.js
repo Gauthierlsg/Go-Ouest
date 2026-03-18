@@ -139,7 +139,9 @@ export function renderPodium(container) {
   const namesEl = container.querySelector('#podium-names');
   const ctx     = canvas.getContext('2d');
 
-  // Names row (below canvas)
+  // Names row (below canvas) — uses same gap/blockW as canvas
+  // gap between columns = 5% of canvas width, each column = 22% of canvas width
+  namesEl.style.gap = '5%';
   namesEl.innerHTML = podium.map(({ rank, duo }) => {
     const known = Boolean(duo?.team);
     return `
@@ -166,22 +168,15 @@ export function renderPodium(container) {
     t += 0.05;
     ctx.clearRect(0, 0, W, H);
 
-    // Background gradient
-    const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, '#1a0a00');
-    grad.addColorStop(1, '#3d1a00');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
-
-    const p      = Math.max(1.5, H / 100);
+    const p      = Math.max(2.5, H / 55);
     const blockW = W * 0.22;
     const gap    = W * 0.05;
     const totalW = 3 * blockW + 2 * gap;
     const startX = (W - totalW) / 2;
 
-    // Block heights: 1st tallest
-    const heights = [H * 0.38, H * 0.52, H * 0.28];
-    const blockBaseY = H * 0.85;
+    // Block heights: shorter podiums
+    const heights = [H * 0.28, H * 0.40, H * 0.20];
+    const blockBaseY = H * 0.92;
 
     podium.forEach(({ rank, duo }, i) => {
       const bh   = heights[i];
