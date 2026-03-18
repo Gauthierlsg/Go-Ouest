@@ -1,6 +1,5 @@
 // Animated pixel-art podium — GO OUEST 2026
-import { computeKnockout, label } from '../tournament.js';
-import { getState } from '../state.js';
+import { allPoolMatches, computeKnockout, label } from '../tournament.js';
 
 // ─── Colors ────────────────────────────────────────────────────────────────
 const SKIN   = '#f4c490';
@@ -114,8 +113,8 @@ function mkConfetti(W) {
 
 // ─── Main render ───────────────────────────────────────────────────────────
 export function renderPodium(container) {
-  const { matches } = getState();
-  const { rounds, champion } = computeKnockout(matches);
+  const matches = allPoolMatches();
+  const { rounds } = computeKnockout(matches);
 
   const first  = rounds.finals[0]?.winner ?? null;
   const second = rounds.finals[0]?.loser  ?? null;
