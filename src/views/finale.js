@@ -1,4 +1,5 @@
 import { allPoolMatches, computeKnockout, label } from '../tournament.js';
+import { renderPodium } from './podium.js';
 import {
   commitScore,
   countInvalidDrawScores,
@@ -138,6 +139,8 @@ export function renderFinale(container) {
       </div>
     </div>
 
+    <div class="section-card" style="margin-top:1.25rem" id="podium-section"></div>
+
     <div class="section-card" style="margin-top:1.25rem">
       <div class="section-title" style="margin-bottom:1rem">Qualifiés provisoires</div>
       <div class="qual-grid">${qualCards}</div>
@@ -145,6 +148,10 @@ export function renderFinale(container) {
 
   ensureBracketLayout(container);
   scheduleBracketLayout(container);
+
+  // Podium après le bracket layout pour ne pas perturber les mesures
+  const podiumSection = container.querySelector('#podium-section');
+  if (podiumSection) requestAnimationFrame(() => requestAnimationFrame(() => renderPodium(podiumSection)));
 
   if (container.dataset.scoreBound === 'true') return;
 
