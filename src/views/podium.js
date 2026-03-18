@@ -253,8 +253,8 @@ export function renderPodium(container) {
 
   const ro = new ResizeObserver(() => resize());
   ro.observe(canvas);
-  resize();
-  tick();
+  // Force resize after 2 frames to ensure canvas is in DOM with correct dimensions
+  requestAnimationFrame(() => requestAnimationFrame(() => { resize(); tick(); }));
 
   // Return cleanup
   return () => { cancelAnimationFrame(animId); ro.disconnect(); };
