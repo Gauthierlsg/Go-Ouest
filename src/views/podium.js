@@ -163,6 +163,7 @@ export function renderPodium(container) {
     </div>`;
   }).join('');
 
+  const podiumComplete = podium.every(({ duo }) => duo?.team);
   let confetti = [];
   let animId;
   let t = 0;
@@ -170,7 +171,7 @@ export function renderPodium(container) {
   function resize() {
     canvas.width  = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
-    confetti = mkConfetti(canvas.width);
+    if (podiumComplete) confetti = mkConfetti(canvas.width);
   }
 
   function tick() {
