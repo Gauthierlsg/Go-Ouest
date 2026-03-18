@@ -210,7 +210,12 @@ function mkPlayer(side, role, shirt) {
   };
 }
 
+let headerCleanup = null;
+
 export function initHeaderArt() {
+  // Clean up previous instance if called again
+  if (headerCleanup) { headerCleanup(); headerCleanup = null; }
+
   const canvas = document.getElementById('header-art');
   if (!canvas) return;
 
@@ -481,5 +486,7 @@ export function initHeaderArt() {
   resize();
   tick();
 
-  return () => { cancelAnimationFrame(animId); ro.disconnect(); };
+  const cleanup = () => { cancelAnimationFrame(animId); ro.disconnect(); };
+  headerCleanup = cleanup;
+  return cleanup;
 }

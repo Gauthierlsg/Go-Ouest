@@ -8,6 +8,9 @@ import {
   isReadOnlyMode,
   setDraftScore,
 } from '../state.js';
+import { sanitizeScore } from '../utils.js';
+
+let podiumCleanup = null;
 
 const BRACKET_CONNECTIONS = [
   ['QF1', 'SF1'],
@@ -20,10 +23,6 @@ const BRACKET_CONNECTIONS = [
   ['SF2', 'TP'],
   ['F', 'CHAMPION'],
 ];
-
-function sanitizeScore(value) {
-  return value.replace(/\D+/g, '').slice(0, 2);
-}
 
 const teamTag = (team) => {
   if (!team?.team) return '<span class="b-team-meta">À déterminer</span>';
@@ -150,8 +149,11 @@ export function renderFinale(container) {
   scheduleBracketLayout(container);
 
   // Podium après le bracket layout pour ne pas perturber les mesures
+  if (podiumCleanup) { podiumCleanup(); podiumCleanup = null; }
   const podiumSection = container.querySelector('#podium-section');
-  if (podiumSection) requestAnimationFrame(() => requestAnimationFrame(() => renderPodium(podiumSection)));
+  if (podiumSection) requestAnimationFrame(() => requestAnimationFrame(() => {
+    podiumCleanup = renderPodium(podiumSection);
+  }));
 
   if (container.dataset.scoreBound === 'true') return;
 

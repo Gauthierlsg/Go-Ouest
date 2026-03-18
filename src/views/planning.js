@@ -14,6 +14,7 @@ import {
   isReadOnlyMode,
   setDraftScore,
 } from '../state.js';
+import { sanitizeScore } from '../utils.js';
 
 const KNOCKOUT_CONFIG = [
   {
@@ -73,10 +74,6 @@ const KNOCKOUT_CONFIG = [
     fallbacks: ['Vainqueur SF1', 'Vainqueur SF2'],
   },
 ];
-
-function sanitizeScore(value) {
-  return value.replace(/\D+/g, '').slice(0, 2);
-}
 
 function fmtClock(totalMinutes) {
   const h = Math.floor(totalMinutes / 60);
