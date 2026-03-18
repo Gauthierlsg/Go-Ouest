@@ -3,7 +3,7 @@
   --g2: #e8670e;
   --bg: #fef6ee;
   --white: #fff;
-  --gray: #6c757d;
+  --gray: #495057;
   --text: #1a1a1a;
   --shadow: 0 2px 12px rgba(0,0,0,0.09);
   --admin-toolbar-offset: 0px !important;
@@ -37,6 +37,7 @@ header {
 }
 .header-logo {
   height: 150px;
+  width: auto;
   object-fit: contain;
   position: relative;
   z-index: 1;
