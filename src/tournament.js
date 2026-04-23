@@ -1,4 +1,4 @@
-import { DUOS, POOLS } from './data.js';
+import { DUOS, POOLS, SHARED_PLAYERS } from './data.js';
 import { getScore, isDrawScore } from './state.js';
 
 export const duo = id => DUOS.find(d => d.id === id);
@@ -52,23 +52,46 @@ function interleaveByPool(matches) {
 // Greedy conflict-free scheduler: 2 courts, no shared team in same slot,
 // 2-slot rest minimum (a team must skip at least 2 slots before replaying).
 // 3-pass: pass 0 = full 2-slot rest, pass 1 = relax to 1-slot rest, pass 2 = no rest constraint.
+// Shared-player awareness: duos sharing a player (SHARED_PLAYERS) are treated as linked —
+// they can't play in the same slot and inherit each other's rest constraints.
 export function buildSchedule(matches) {
+  // Build linked-teams map from SHARED_PLAYERS
+  const linkedTeams = new Map();
+  SHARED_PLAYERS.forEach(([id1, id2]) => {
+    if (!linkedTeams.has(id1)) linkedTeams.set(id1, new Set());
+    if (!linkedTeams.has(id2)) linkedTeams.set(id2, new Set());
+    linkedTeams.get(id1).add(id2);
+    linkedTeams.get(id2).add(id1);
+  });
+
+  // Expand a set of team IDs to also include their linked counterparts
+  const withLinked = ids => {
+    const out = new Set(ids);
+    for (const id of ids) linkedTeams.get(id)?.forEach(lid => out.add(lid));
+    return out;
+  };
+
   const rem = interleaveByPool(matches); const slots = [];
   while (rem.length) {
-    const rested2 = new Set([
+    const rested2 = withLinked([
       ...(slots[slots.length - 1] || []).flatMap(m => [m.t1, m.t2]),
       ...(slots[slots.length - 2] || []).flatMap(m => [m.t1, m.t2]),
     ]);
-    const rested1 = new Set(
+    const rested1 = withLinked(
       (slots[slots.length - 1] || []).flatMap(m => [m.t1, m.t2])
     );
-    const used = new Set(); const slot = [];
+    const used = new Set(); const usedExpanded = new Set(); const slot = [];
     for (let pass = 0; pass < 3 && slot.length < 2; pass++) {
       const blocked = pass === 0 ? rested2 : pass === 1 ? rested1 : new Set();
       for (let i = 0; i < rem.length && slot.length < 2; i++) {
         const m = rem[i];
-        if (!used.has(m.t1) && !used.has(m.t2) && !blocked.has(m.t1) && !blocked.has(m.t2)) {
-          slot.push(m); used.add(m.t1); used.add(m.t2);
+        if (!usedExpanded.has(m.t1) && !usedExpanded.has(m.t2) &&
+            !blocked.has(m.t1) && !blocked.has(m.t2)) {
+          slot.push(m);
+          used.add(m.t1); used.add(m.t2);
+          usedExpanded.add(m.t1); usedExpanded.add(m.t2);
+          linkedTeams.get(m.t1)?.forEach(lid => usedExpanded.add(lid));
+          linkedTeams.get(m.t2)?.forEach(lid => usedExpanded.add(lid));
           rem.splice(i--, 1);
         }
       }
