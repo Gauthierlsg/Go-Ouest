@@ -45,7 +45,7 @@ export const POOLS = [
   { name: "Poule G", color: "#155e75", teams: [18, 19, 22]      },
 ];
 
-export const MATCH_DURATION_MIN = 15;
+export const MATCH_DURATION_MIN = 10;
 export const TRANSITION_MIN = 5;
 export const SLOT_MIN = MATCH_DURATION_MIN + TRANSITION_MIN;
 export const START_HOUR = 10;
