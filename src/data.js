@@ -46,7 +46,7 @@ export const POOLS = [
 ];
 
 export const MATCH_DURATION_MIN = 10;
-export const TRANSITION_MIN = 5;
+export const TRANSITION_MIN = 0;
 export const SLOT_MIN = MATCH_DURATION_MIN + TRANSITION_MIN;
-export const START_HOUR = 10;
+export const START_HOUR = 12;
 export const KNOCKOUT_BREAK_MIN = 15;
