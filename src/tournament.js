@@ -1,4 +1,4 @@
-import { DUOS, POOLS, SHARED_PLAYERS } from './data.js';
+import { DUOS, POOLS, SHARED_PLAYERS, DELAYED_STARTS } from './data.js';
 import { getScore, isDrawScore } from './state.js';
 
 export const duo = id => DUOS.find(d => d.id === id);
@@ -55,6 +55,9 @@ function interleaveByPool(matches) {
 // Shared-player awareness: duos sharing a player (SHARED_PLAYERS) are treated as linked —
 // they can't play in the same slot and inherit each other's rest constraints.
 export function buildSchedule(matches) {
+  // Build delayed-start map: teamId -> minSlot index
+  const minSlotMap = new Map(DELAYED_STARTS.map(({ teamId, minSlot }) => [teamId, minSlot]));
+
   // Build linked-teams map from SHARED_PLAYERS
   const linkedTeams = new Map();
   SHARED_PLAYERS.forEach(([id1, id2]) => {
@@ -85,7 +88,9 @@ export function buildSchedule(matches) {
       const blocked = pass === 0 ? rested2 : pass === 1 ? rested1 : new Set();
       for (let i = 0; i < rem.length && slot.length < 2; i++) {
         const m = rem[i];
-        if (!usedExpanded.has(m.t1) && !usedExpanded.has(m.t2) &&
+        const tooEarly = (minSlotMap.get(m.t1) ?? 0) > slots.length ||
+                         (minSlotMap.get(m.t2) ?? 0) > slots.length;
+        if (!tooEarly && !usedExpanded.has(m.t1) && !usedExpanded.has(m.t2) &&
             !blocked.has(m.t1) && !blocked.has(m.t2)) {
           slot.push(m);
           used.add(m.t1); used.add(m.t2);

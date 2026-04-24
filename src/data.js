@@ -26,6 +26,12 @@ export const DUOS = [
   { id: 25, p1: "Aglaé",        p2: "Gauthier",     fort: true },
 ];
 
+// Duos ne pouvant pas jouer avant un certain créneau (index de slot, 0 = heure de début)
+// Mathilde/Victor (19) : pas avant 12h40 → slot 4 (4 × 10 min)
+export const DELAYED_STARTS = [
+  { teamId: 19, minSlot: 4 },
+];
+
 // Duos partageant un joueur : le scheduler les traite comme liés (pas de créneau simultané)
 // Sixtine : duos 20 & 23 — Anne-Thaïs : duos 21 & 24
 export const SHARED_PLAYERS = [
