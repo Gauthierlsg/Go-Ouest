@@ -35,14 +35,14 @@ export const SHARED_PLAYERS = [
 
 export const POOLS = [
   // Poules de 4 — chacune contient un duo "Fort"
-  { name: "Poule A", color: "#1a5c38", teams: [9,  20, 1,  2]  }, // Fort: 9  | Anne-Thaïs: 20
-  { name: "Poule B", color: "#1a4a7c", teams: [12, 24, 3,  4]  }, // Fort: 12 | Anne-Thaïs: 24
-  { name: "Poule C", color: "#7c1a1a", teams: [16, 21, 5,  6]  }, // Fort: 16 | Sixtine: 21
-  { name: "Poule D", color: "#6b21a8", teams: [25, 23, 7,  8]  }, // Fort: 25 | Sixtine: 23
-  // Poules de 3
-  { name: "Poule E", color: "#92400e", teams: [10, 11, 13]      },
-  { name: "Poule F", color: "#0e6b5e", teams: [14, 15, 17]      },
-  { name: "Poule G", color: "#155e75", teams: [18, 19, 22]      },
+  { name: "Poule A", color: "#1a5c38", teams: [9,  1,  2,  3]  }, // Fort: 9
+  { name: "Poule B", color: "#1a4a7c", teams: [12, 4,  5,  6]  }, // Fort: 12
+  { name: "Poule C", color: "#7c1a1a", teams: [16, 7,  8,  10] }, // Fort: 16
+  { name: "Poule D", color: "#6b21a8", teams: [25, 11, 13, 14] }, // Fort: 25
+  // Poules de 3 — duos à joueur partagé (2 matchs au lieu de 3)
+  { name: "Poule E", color: "#92400e", teams: [20, 15, 17]      }, // Sixtine V2
+  { name: "Poule F", color: "#0e6b5e", teams: [21, 18, 19]      }, // Anne-Thaïs V2
+  { name: "Poule G", color: "#155e75", teams: [23, 24, 22]      }, // Sixtine & Anne-Thaïs
 ];
 
 export const MATCH_DURATION_MIN = 10;
