@@ -18,8 +18,8 @@ export const DUOS = [
   { id: 17, p1: "Maylis",       p2: "Théophile"     },
   { id: 18, p1: "Victoire G.",  p2: "Stan"          },
   { id: 19, p1: "Mathilde",     p2: "Victor"        },
-  { id: 20, p1: "Anne-Thaïs",   p2: "Léo R."        },
-  { id: 21, p1: "Sixtine",      p2: "Thomas"        },
+  { id: 20, p1: "Sixtine V2",   p2: "Léo R."        },
+  { id: 21, p1: "Anne-Thaïs V2", p2: "Thomas"      },
   { id: 22, p1: "Max",          p2: "Paul"          },
   { id: 23, p1: "Sixtine",      p2: "Gaspard"       },
   { id: 24, p1: "Anne-Thaïs",   p2: "Brieuc"        },
@@ -27,10 +27,10 @@ export const DUOS = [
 ];
 
 // Duos partageant un joueur : le scheduler les traite comme liés (pas de créneau simultané)
-// Sixtine : duos 21 & 23 — Anne-Thaïs : duos 20 & 24
+// Sixtine : duos 20 & 23 — Anne-Thaïs : duos 21 & 24
 export const SHARED_PLAYERS = [
-  [21, 23],
-  [20, 24],
+  [20, 23],
+  [21, 24],
 ];
 
 export const POOLS = [
